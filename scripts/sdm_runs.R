@@ -16,19 +16,19 @@ library(jsonlite)
 ### Run scripts
 #save.image(file.path(path_write,"sdm.RData"))
 
-path <- "/home/frousseu"
-path_write <- "/home/frousseu/data"
+if(!dir.exists("outputs")){
+  dir.create("outputs")
+}
+
+if(!dir.exists("data")){
+  stop("Missing data folder")
+}
 
 
 ### Get a current snapshot of the repo when running the pipeline 
 github_user <- "frousseu"
 github_token_path <- "/home/frousseu/.ssh/github_token"
 repo <- "BiodiversiteQuebec/sdm_method_explorer"
-
-
-
-
-
 
 
 source("scripts/sdm_utils.R", local = TRUE)
@@ -42,16 +42,13 @@ runs <- 1:nrow(results)
 #cl<-makeCluster(4)
 #registerDoParallel(cl)
 
-nworkers<-min(c(nrow(runs),12))
+nworkers<-min(c(length(runs),12))
 
 plan(multisession,workers=nworkers)
 future_lapply(runs,function(i){
 #foreach(i=runs) %dopar% {
   
   message("TESTING")
-  
-  path<-"/home/frousseu"
-  path_write<-"/home/frousseu/data"
   
   source("scripts/sdm_utils.R",local = TRUE)
   source("scripts/sdm_inputs.R",local = TRUE)
