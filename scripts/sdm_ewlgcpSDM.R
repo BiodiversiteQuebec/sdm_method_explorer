@@ -103,10 +103,10 @@ m<-ewlgcp(
 
 ## Map results
 
-sdm<-ewlgcpSDM::map(model=m,
-                    dmesh=dmesh,
-                    dims=c(1000,1000),
-                    region = region
+sdm<-ewlgcpSDM::map(model = m,
+                    dmesh = dmesh,
+                    dims = c(1000,1000),
+                    region= region
 )
 
 #preds<-exp(sdm$linkmean-sdm$spacemean)
@@ -114,7 +114,7 @@ sdm<-ewlgcpSDM::map(model=m,
 #preds<-exp(sdm$"link0.5quant")
 #preds<-sdm[[c("0.025quant","mean","0.975quant")]]
 preds<-sdm[[c("mean")]]
-#preds<-mask(preds,vect(region))
+#preds <- mask(preds, vect(region))
 #plot(preds)
 
 #plot_preds()

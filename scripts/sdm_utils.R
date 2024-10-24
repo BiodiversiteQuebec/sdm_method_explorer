@@ -19,7 +19,7 @@ plot_preds<-function(occs=TRUE){
 
 write_preds<-function(preds){
   filename<-paste(tolower(gsub(" ","_",params$species)),params$algorithm,params$usepredictors,params$bias,params$spatial,sep="_") |> paste0(".tif")
-  filepath<-file.path(file.path(file.path(path_write,"sdms"),filename))
+  filepath<-file.path("outputs",filename)
   res<-crop(preds,vect(region),mask=TRUE)
   res<-mask(res,vect(lakes),inverse=TRUE)
   writeRaster(res,filepath,overwrite=TRUE)    
@@ -106,7 +106,14 @@ checkpoint<-function(msg="Starting:"){
   message(paste(msg,paste0(params,collapse=" - "),"/",Sys.time(),"\n"))
 }
 
-
+get_repo_snapshot <- function(repo, user, tokenpath, n = 10){
+  token <- readLines(tokenpath)
+  githubapi <- paste0("https://", user, ":", token, "@api.github.com/repos/", repo, "/commits")
+  x <- fromJSON(paste0(githubapi,"?per_page=", n, "&files=false"))
+  latest_commit <- x$sha[1]
+  repo_snapshot <- file.path("https://github.com", repo, "tree", latest_commit)
+  repo_snapshot
+}
 
 
 

@@ -9,7 +9,7 @@ cols<-colo.scale(1:200,cols)
 
 
 
-lf<-list.files("/home/frousseu/data/sdms",full=TRUE,pattern="striata")
+lf<-list.files("outputs", full = TRUE, pattern = ".tif")
 
 
 
@@ -53,10 +53,10 @@ lapply(split(res[!is.na(auc),],))
 
 
 
-lf<-list.files("/home/frousseu/data/sdms",full=TRUE,pattern="bonasa_umbellus_brt_Predictors_Bias_noSpatial")
+lf<-list.files("outputs",full=TRUE,pattern="bonasa_umbellus_brt_Predictors_Bias_noSpatial")
 r1<-rast(lf)
 
-lf<-list.files("/home/frousseu/data/ebird",full=TRUE,pattern="Bonasa_umbellus")
+lf<-list.files("data",full=TRUE,pattern="Bonasa_umbellus")
 r2<-rast(lf)
 
 r3<-project(r2,r1,mask=TRUE)

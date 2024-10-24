@@ -13,18 +13,16 @@ if(data == "gbif"){
   gbif<-mask(gbif,vect(st_buffer(st_transform(region,4326),1)))
   gbif<-subst(gbif,NA,0) # replace NAs with 0
   
-  
-  
   ### Simulate effort surface/background obs from gbif density raster
   if( params$bias == "Bias"){
-    p<-spatSample(gbif,nbackground*mult,as.points=TRUE,method="weights")
+    p<-spatSample(gbif, nbackground * mult, as.points = TRUE, method = "weights")
     tb<-st_as_sf(p) |> st_transform(st_crs(region))
-    tb<-tb[,"geometry"]
+    tb<-tb[, "geometry"]
   }else{
-    tb<-st_sample(region,nbackground*mult)  
+    tb <- st_sample(region, nbackground * mult)  
   }
-  tb<-tb[region,] # keep what's in region
-  tb<-tb[sample(1:nrow(tb),min(c(nbackground,nrow(tb)))),] # keep the specified number of background points
+  tb <- tb[region,] # keep what's in region
+  tb <- tb[sample(1:nrow(tb), min(c(nbackground, nrow(tb)))), ] # keep the specified number of background points
 
 }
 
@@ -37,7 +35,7 @@ if(data == "ebird"){
   #              query = paste0("SELECT * ebird_sampling_events WHERE year=", year,paste0(" ORDER BY RANDOM() LIMIT ",nbackground*mult)), quiet = T
   #)
   if(params$bias == "Bias"){
-    tb <- st_read(file.path(path_write,"ebird_sampling_events.gpkg"),
+    tb <- st_read("data/ebird_sampling_events.gpkg",
                   query = paste0("SELECT * FROM ebird_sampling_events WHERE year IN", paste0("(",paste(year,collapse=","),")"),paste0(" ORDER BY RANDOM() LIMIT ",nbackground*mult)), quiet = T
     )
     tb<-st_transform(tb,st_crs(region))

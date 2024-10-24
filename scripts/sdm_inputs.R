@@ -20,9 +20,10 @@ species<-c("Bonasa umbellus", "Catharus bicknelli", "Catharus fuscescens",
            "Setophaga striata", "Setophaga tigrina", "Setophaga virens")
 
 sp<-species[10:length(species)]
-sp<-c("Bonasa umbellus","Falcipennis canadensis","Setophaga americana", "Catharus fuscescens")
+#sp<-c("Bonasa umbellus","Falcipennis canadensis","Setophaga americana", "Catharus fuscescens")
 #sp<-c("Melospiza melodia")
-sp<-species
+#sp<-species
+sp<-c("Bonasa umbellus")
 
 
 rerun<-FALSE
@@ -33,13 +34,13 @@ target_group <- c("birds")
 
 vars_pool<-c("tmax","prec","trange","elevation","truggedness","deciduous_esa","mixed_esa","conifers_esa","shrubs_esa","crop_esa","grass_esa","builtup_esa","water_esa","sparse_esa","harsh_esa","wettree_esa","wetherbaceous_esa")
 
-algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[3:4]
+algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")#[3:4]
 bias<-c("Bias","noBias")
 usepredictors<-c("Predictors","noPredictors")
 spatial<-c("Spatial","noSpatial")
 
-nbackground<-10000 # number of background points
-mult<-2                   # multiply by this value to get more background points from which to resample to get the desired value (in cases of NAs
+nbackground <- 10000 # number of background points
+mult <- 2                   # multiply by this value to get more background points from which to resample to get the desired value (in cases of NAs
 
 results<-expand.grid(species=sp,algorithm=algorithms,bias=bias,usepredictors=usepredictors,spatial=spatial,stringsAsFactors=FALSE)
 results<- results[apply(results[,c("usepredictors","spatial")],1,function(i){!all(c("noPredictors","noSpatial")==i)}),] # remove nopredictors and nospatial

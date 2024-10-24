@@ -11,8 +11,8 @@ library(rnaturalearth)
 library(ewlgcpSDM)
 
 # Downloads polygons using package geodata
-can<-gadm("CAN",level=1,path=getwd()) |> st_as_sf()
-usa<-gadm("USA",level=1,path=getwd()) |> st_as_sf()
+can<-gadm("CAN",level=1,path="data") |> st_as_sf()
+usa<-gadm("USA",level=1,path="data") |> st_as_sf()
 na<-rbind(can,usa)
 na<-st_transform(na,32618)
 
@@ -34,13 +34,13 @@ region<-ms_simplify(region,0.005)
 region<-st_union(region) |> st_as_sf()
 
 # lakes
-lakes<-ne_download(scale="medium",type="lakes",destdir=getwd(),category="physical",returnclass="sf") |> st_transform(32618)
+lakes<-ne_download(scale="medium",type="lakes",destdir="data",category="physical",returnclass="sf") |> st_transform(32618)
 lakes<-st_filter(lakes,region)
 
 plot(st_geometry(region))
 
 if(data=="ebird"){
-  checklists<-fread(file.path(path,"ebird_sampling_events.csv"))
+  checklists<-fread("data/ebird_sampling_events.csv")
 }
 
 

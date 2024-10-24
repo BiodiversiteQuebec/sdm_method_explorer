@@ -45,7 +45,7 @@ if( data == "ebird") {
 # https://stackoverflow.com/questions/4114940/select-random-rows-in-sqlite
 
   spp<-tolower(gsub(" ","_",params$species))
-  obs <- st_read(file.path(path_write,"total_occ_pres_only_versionR_UTM.gpkg"),
+  obs <- st_read("data/total_occ_pres_only_versionR_UTM.gpkg",
                   query = paste0("SELECT * FROM total_occ_pres_only_versionR WHERE year_obs IN", paste0("(",paste(year,collapse=","),")")," AND species=\"",tolower(spp),"\""), quiet = T
   )
   obs<-st_transform(obs,st_crs(region))
@@ -64,41 +64,33 @@ if(data == "atlas"){
   library(dplyr)
   library(duckdb)
   
-  atlas_local <- function(parquet_file,
-                          tblname="atlas"){
-    requireNamespace("duckdbfs")
-    atlas<-duckdbfs::open_dataset(parquet_file, tblname = tblname)
-    atlas
-  }
+  source("https://object-arbutus.cloud.computecanada.ca/bq-io/atlas/parquet/bq-atlas-parquet.R")
+  atlas <- atlas_remote(parquet_date = "2024-07-16")
   
-  atlas <- atlas_local(file.path(path_write,"atlas.parquet"),'atlas')
+  params <- list()
+  params$species <- "Carex lurida"
   
-  x <- atlas |>
-    filter(valid_scientific_name == 'Dendroica cerulea') |>
-    #group_by()
-    collect() |>
-    #sample_n(20000) |>
-    as.data.table()
+  genus <- strsplit(params$species, " ")[[1]][1] # temp fix to also get subspecies and string manipulations do not seem to work when dplyr remote
+  species <- params$species
   
-  x[,date:=as.character(as.Date(paste(year_obs,month_obs,day_obs,sep="-"),format="%Y-%m-%d"))]
-  x<-x[!is.na(date),]
-  x[,jul:=as.integer(format(as.Date(date),"%j"))]
-  x[,year:=as.integer(substr(date,1,4))]
-  x[,species:=valid_scientific_name]
+  obs <- atlas |> 
+    filter(genus == !!genus) |> 
+    #filter(valid_scientific_name == species) |> 
+    mutate(geom = ST_Point(as.numeric(longitude), as.numeric(latitude))) |> 
+    to_sf(crs = 4326) |> 
+    collect()
   
-  x<-st_as_sf(x,coords=c("longitude","latitude"),crs=4326)
-  x<-st_transform(x,epsg)
+  obs <- obs |>
+    mutate(species = sapply(strsplit(valid_scientific_name, " "), function(i){paste(i[1:2], collapse = " ")})) |>
+    filter(observation_value != "0") |>
+    #mutate(species = sub("^(([^ ]+ ){1}[^ ]+).*", "\\1", valid_scientific_name)) |>
+    filter(species == !!species)
   
+  obs <- obs |>
+           mutate(date = as.character(as.Date(paste(year_obs, month_obs, day_obs, sep="-"), format = "%Y-%m-%d")))
   
-  buff<-concaveman(x) |> st_buffer(200000)
-
-  plot(crop(predictors[["elevation"]],buff,mask=TRUE),mar=c(0,0,0,0))
-  plot(st_geometry(qc),add=TRUE)
-  plot(st_geometry(x),add=TRUE)
+  obs <- st_transform(obs, epsg)
   
   
 }
-
-
-
 

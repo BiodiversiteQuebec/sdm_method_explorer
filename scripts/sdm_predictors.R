@@ -4,7 +4,7 @@ cat(paste("Running: predictors","/",Sys.time(),"\n"))
 library(terra)
 library(sf)
 
-predictors<-rast(file.path(path,"predictors.tif"))
+predictors<-rast("data/predictors.tif")
 predictors<-predictors[[vars_pool]]
 predictors<-crop(predictors,vect(st_transform(region,st_crs(predictors))),mask=TRUE,touches=FALSE)
 #vars<-c(c("tmax","prec","trange","elevation","truggedness"),grep("_esa",names(predictors),value=TRUE))
