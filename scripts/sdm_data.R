@@ -15,8 +15,8 @@ if(data == "gbif"){
   wkt<-st_transform(wkt,4326)
   wkt<-st_as_text(wkt)
   
-  years<-if(length(year)>1){paste(range(year),collapse=",")}else{year}
-  obs<-rgbif::occ_data(scientificName = params$species, hasCoordinate = TRUE,limit=5000,geometry=wkt, year=years)$data
+  y <- gsub("-", ",", params$years)
+  obs<-rgbif::occ_data(scientificName = params$species, hasCoordinate = TRUE,limit=5000,geometry=wkt, year=y)$data
   rem<-which(obs$coordinateUncertaintyInMeters>30000) # removes locations with high uncertainty
   if(any(rem)){
     obs<-obs[-rem,]
@@ -43,10 +43,15 @@ if(data == "gbif"){
 if( data == "ebird") {
 # SELECT * FROM table WHERE id IN (SELECT id FROM table ORDER BY RANDOM() LIMIT x) # possibly faster if there is a row id
 # https://stackoverflow.com/questions/4114940/select-random-rows-in-sqlite
+  
+  y <- as.integer(strsplit(params$years, "-")[[1]])
+  if(length(y) > 1){
+    y <- paste(min(y):max(y), collapse = ",")
+  }
 
   spp<-tolower(gsub(" ","_",params$species))
   obs <- st_read("data/total_occ_pres_only_versionR_UTM.gpkg",
-                  query = paste0("SELECT * FROM total_occ_pres_only_versionR WHERE year_obs IN", paste0("(",paste(year,collapse=","),")")," AND species=\"",tolower(spp),"\""), quiet = T
+                  query = paste0("SELECT * FROM total_occ_pres_only_versionR WHERE year_obs IN", paste0("(", y, ")")," AND species=\"",tolower(spp),"\""), quiet = T
   )
   obs<-st_transform(obs,st_crs(region))
   obs<-obs[region,]

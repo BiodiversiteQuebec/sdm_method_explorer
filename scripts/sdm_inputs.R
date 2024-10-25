@@ -28,8 +28,14 @@ sp<-c("Bonasa umbellus")
 
 rerun<-TRUE
 
-year <- 2017:2018 # year wanted or a vector of years, has to be a range for gbif data
-yearparam <- ifelse(length(year) > 1, paste(min(year), max(year), sep = "-"), year) 
+years <- list( # year wanted or a vector of years, has to be a range for gbif data
+  2017:2019,
+  2020:2024
+)
+
+yearparams <- sapply(years, function(y){
+  ifelse(length(y) > 1, paste(min(y), max(y), sep = "-"), y) 
+})
 
 target_group <- c("birds")
 
@@ -46,7 +52,7 @@ mult <- 2                   # multiply by this value to get more background poin
 
 results <- expand.grid(species = sp, 
                        target_group = target_group, 
-                       year = yearparam, 
+                       years = yearparams, 
                        algorithm = algorithms, 
                        bias = bias,
                        usepredictors = usepredictors, 

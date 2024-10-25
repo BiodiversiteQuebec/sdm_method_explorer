@@ -34,9 +34,16 @@ if(data == "ebird"){
   #tb <- st_read("C:/Users/rouf1703/Downloads/vbellavance/ebird_sampling_events.gpkg",
   #              query = paste0("SELECT * ebird_sampling_events WHERE year=", year,paste0(" ORDER BY RANDOM() LIMIT ",nbackground*mult)), quiet = T
   #)
+  
+  
+  y <- as.integer(strsplit(params$years, "-")[[1]])
+  if(length(y) > 1){
+    y <- paste(min(y):max(y), collapse = ",")
+  }
+  
   if(params$bias == "Bias"){
     tb <- st_read("data/ebird_sampling_events.gpkg",
-                  query = paste0("SELECT * FROM ebird_sampling_events WHERE year IN", paste0("(",paste(year,collapse=","),")"),paste0(" ORDER BY RANDOM() LIMIT ",nbackground*mult)), quiet = T
+                  query = paste0("SELECT * FROM ebird_sampling_events WHERE year IN", paste0("(", y, ")"),paste0(" ORDER BY RANDOM() LIMIT ",nbackground * mult)), quiet = T
     )
     tb<-st_transform(tb,st_crs(region))
   }else{
