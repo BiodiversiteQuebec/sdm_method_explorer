@@ -2,7 +2,11 @@
 .Rhistory
 .RData
 .Ruserdata
-sdm_method_explorer.Rproj
-results.csv
 outputs
 data
+json
+*.Rproj
+*.png
+*.pdf
+*.tif
+*.json

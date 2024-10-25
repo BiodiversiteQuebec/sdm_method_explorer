@@ -124,7 +124,7 @@ write_preds(preds)
 auc<-NA
 I<-niche_overlap()
 
-add_results()
+write_results()
 
 checkpoint("Done:")
 

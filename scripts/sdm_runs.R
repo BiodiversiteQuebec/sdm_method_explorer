@@ -20,6 +20,10 @@ if(!dir.exists("outputs")){
   dir.create("outputs")
 }
 
+if(!dir.exists("json")){
+  dir.create("json")
+}
+
 if(!dir.exists("data")){
   stop("Missing data folder")
 }
@@ -81,9 +85,13 @@ future_lapply(runs,function(i){
          }
   )
 },future.conditions="message")
+
 plan(sequential)
+
+add_results()
+
 clean_results()
-#stopCluster(cl)
+
 
 
 

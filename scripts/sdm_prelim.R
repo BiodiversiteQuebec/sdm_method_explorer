@@ -37,8 +37,6 @@ region<-st_union(region) |> st_as_sf()
 lakes<-ne_download(scale="medium",type="lakes",destdir="data",category="physical",returnclass="sf") |> st_transform(32618)
 lakes<-st_filter(lakes,region)
 
-plot(st_geometry(region))
-
 if(data=="ebird"){
   checklists<-fread("data/ebird_sampling_events.csv")
 }

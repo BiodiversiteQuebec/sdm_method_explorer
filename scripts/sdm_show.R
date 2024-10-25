@@ -1,18 +1,16 @@
 
 library(terra)
-library(FRutils)
+#library(FRutils)
 library(data.table)
 library(dismo)
+library(jsonlite)
+
+source("https://raw.githubusercontent.com/frousseu/FRutils/refs/heads/master/R/colo.scale.R")
 
 cols<-c("#CCCCCC","#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00","darkorange")
 cols<-colo.scale(1:200,cols)
 
-
-
 lf<-list.files("outputs", full = TRUE, pattern = ".tif")
-
-
-
 
 png("sdms.png",width=16,height=10,res=400,units="in")
 par(mfrow=n2mfrow(length(lf),asp=3/2))
@@ -29,8 +27,7 @@ dev.off()
 file.show("sdms.png")
 
 
-res<-fread("results.csv")
-#res[order(species,algorithm,bias,usepredictors,spatial)]
+res<-fromJSON("results.json") |> setDT()
 res[rev(order(time)),]
 res<-res[!is.na(auc),]
 res<-res[!is.na(I),]
@@ -44,7 +41,7 @@ betas<-lapply(split(res,res$species),function(i){
 hist(unlist(betas),breaks=20)
 
 
-res<-fread("results.csv")
+res<-fromJSON("results.json") |> setDT()
 #res[order(species,algorithm,bias,usepredictors,spatial)]
 res[rev(order(time)),]
 plot(auc~I,data=res[!is.na(auc),])
@@ -74,12 +71,6 @@ nicheOverlap(raster(r1),raster(r3),stat="I", checkNegatives=FALSE)
 #sudo mkfs.xfs -L data -f /dev/vdb # check the volume name in the OpenStack UI (here, /dev/vdc)
 #mkdir /home/frousseu/data
 #sudo mount /dev/vdb /home/frousseu/data
-
 #sudo chown -R frousseu /home
-
-
-
-
-
 
 # scp frousseu@sdm:'/home/frousseu/data/sdms/*' C:/Users/rouf1703/Documents/BiodiversitéQuébec/sdm_explorer/sdms

@@ -26,31 +26,53 @@ sp<-species[10:length(species)]
 sp<-c("Bonasa umbellus")
 
 
-rerun<-FALSE
+rerun<-TRUE
 
-year<-2017:2018 # year wanted or a vector of years, has to be a range for gbif data
+year <- 2017:2018 # year wanted or a vector of years, has to be a range for gbif data
+yearparam <- ifelse(length(year) > 1, paste(min(year), max(year), sep = "-"), year) 
 
 target_group <- c("birds")
 
 vars_pool<-c("tmax","prec","trange","elevation","truggedness","deciduous_esa","mixed_esa","conifers_esa","shrubs_esa","crop_esa","grass_esa","builtup_esa","water_esa","sparse_esa","harsh_esa","wettree_esa","wetherbaceous_esa")
 
-algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")#[3:4]
-bias<-c("Bias","noBias")
-usepredictors<-c("Predictors","noPredictors")
-spatial<-c("Spatial","noSpatial")
+algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(2, 4)]
+bias<-c("Bias","noBias")[1]
+usepredictors<-c("Predictors","noPredictors")[1]
+spatial<-c("Spatial","noSpatial")[2]
 
 nbackground <- 10000 # number of background points
 mult <- 2                   # multiply by this value to get more background points from which to resample to get the desired value (in cases of NAs
 
-results<-expand.grid(species=sp,algorithm=algorithms,bias=bias,usepredictors=usepredictors,spatial=spatial,stringsAsFactors=FALSE)
-results<- results[apply(results[,c("usepredictors","spatial")],1,function(i){!all(c("noPredictors","noSpatial")==i)}),] # remove nopredictors and nospatial
+
+results <- expand.grid(species = sp, 
+                       target_group = target_group, 
+                       year = yearparam, 
+                       algorithm = algorithms, 
+                       bias = bias,
+                       usepredictors = usepredictors, 
+                       spatial = spatial, 
+                       stringsAsFactors = FALSE)
+
+results <- results[apply(results[,c("usepredictors","spatial")],1,function(i){!all(c("noPredictors","noSpatial")==i)}),] # remove nopredictors and nospatial
+
+
 
 if(!rerun){
-  x<-fread("results.csv")
-  results<-fsetdiff(setDT(results),x[,names(results),with=FALSE],all=FALSE) |> as.data.frame()
+  x <- fromJSON("results.json") |> setDT()
+  results <- fsetdiff(setDT(results), x[, names(results), with = FALSE], all = FALSE) |> as.data.frame()
 }
 
 
 
+#library(jsonlite)
+#new <- toJSON(results)
+#write_json(results, "x")
 
-#params<-list(algorithm=algorithms[1],bias=bias[1],usepredictors=usepredictors[1],spatial=spatial[2])
+#dplyr::bind_rows(results, old)
+#xx <- rbindlist(list(results, old), fill = TRUE)
+#write_json(results, "results.json")
+
+#if(file.exists("results.json")){
+#  old <- fromJSON("results.json")
+#  res <- rbindlist(list(results, old), fill = TRUE)
+#}

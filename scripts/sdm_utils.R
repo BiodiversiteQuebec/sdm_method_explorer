@@ -18,7 +18,7 @@ plot_preds<-function(occs=TRUE){
 
 
 write_preds<-function(preds){
-  filename<-paste(tolower(gsub(" ","_",params$species)),params$algorithm,params$usepredictors,params$bias,params$spatial,sep="_") |> paste0(".tif")
+  filename<-paste(tolower(gsub(" ","",params$species)),params$year,params$algorithm,params$usepredictors,params$bias,params$spatial,sep="_") |> paste0(".tif")
   filepath<-file.path("outputs",filename)
   res<-crop(preds,vect(region),mask=TRUE)
   res<-mask(res,vect(lakes),inverse=TRUE)
@@ -58,31 +58,43 @@ adjust_vars<-function(vars,params){
   vars
 }
 
-add_results<-function(){
-  x<-fread("results.csv")
-  info<-params
-  info$auc<-auc
-  info$I<-I
-  info$time<-Sys.time()
-  a<-as.data.table(info)
-  a<-a[,names(x),with=FALSE]
-  x<-rbind(x,a)
-  x<-x[rev(order(time)),]
-  x<-unique(x, by = c("species","algorithm","bias","usepredictors","spatial"))
-  fwrite(x,"results.csv",append=TRUE)
-  print(x[1,])
+write_results<-function(){
+  #x<-fread("results.csv")
+  res <- params
+  res$auc <- auc
+  res$I <- I
+  res$time <- Sys.time()
+  setDT(res)
+  write_json(res, paste0("json/results", formatC(i, width = 6, flag = 0), ".json"))
+  #a <- a[, names(x), with = FALSE]
+  #x <- rbind(x, a)
+  #x <- x[rev(order(time)),]
+  #x <- unique(x, by = c("species", "algorithm", "bias", "usepredictors", "spatial", "reposnapshot"))
+  #fwrite(x, "results.csv", append = TRUE)
+  #print(x[1, ])
 }
 
-clean_results<-function(){
-  x<-fread("results.csv")
-  x<-x[rev(order(time)),]
-  x<-unique(x, by = c("species","algorithm","bias","usepredictors","spatial"))
-  fwrite(x,"results.csv",append=FALSE)
+add_results <- function(){
+  lf <- list.files("json", full = TRUE)
+  x <- lapply(lf, fromJSON) |>
+    rbindlist(fill = TRUE)
+  if(file.exists("results.json")){
+    old <- fromJSON("results.json")
+    x <- rbindlist(list(x, old), fill = TRUE)
+  }
+  x <- x[rev(order(time)), ]
+  #fwrite(x, "results.csv", append = FALSE)
+  write_json(x, "results.json")
   #print(x)
 }
-#clean_results()
 
-#add_results()
+clean_results <- function(){
+  lf <- list.files("json", full = TRUE)
+  if(length(lf)){
+    unlink(lf)
+  }
+}
+
 
 niche_overlap<-function(){
   lf<-list.files("/home/frousseu/data/ebird",pattern=gsub(" ","_",params$species),full=TRUE)
