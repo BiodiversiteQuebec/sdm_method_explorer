@@ -5,7 +5,7 @@ message(paste("Running: inputs","/",Sys.time(),"\n"))
 
 library(data.table)
 
-data <- c("gbif","ebird")[2]
+data <- c("gbif", "ebird", "atlas")[2]
 
 epsg <- 32618 #32198 quebec lambert conforme #paste0("+units=km +init=epsg:",32198) #32198 # 32618 the original
 
@@ -29,8 +29,8 @@ sp<-c("Bonasa umbellus")
 rerun<-TRUE
 
 years <- list( # year wanted or a vector of years, has to be a range for gbif data
-  2017:2019,
-  2020:2024
+  2017:2018,
+  2019:2020
 )
 
 yearparams <- sapply(years, function(y){
@@ -41,7 +41,7 @@ target_group <- c("birds")
 
 vars_pool<-c("tmax","prec","trange","elevation","truggedness","deciduous_esa","mixed_esa","conifers_esa","shrubs_esa","crop_esa","grass_esa","builtup_esa","water_esa","sparse_esa","harsh_esa","wettree_esa","wetherbaceous_esa")
 
-algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(2, 4)]
+algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1, 2, 3, 4)]
 bias<-c("Bias","noBias")[1]
 usepredictors<-c("Predictors","noPredictors")[1]
 spatial<-c("Spatial","noSpatial")[2]

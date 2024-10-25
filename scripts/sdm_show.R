@@ -10,21 +10,22 @@ source("https://raw.githubusercontent.com/frousseu/FRutils/refs/heads/master/R/c
 cols<-c("#CCCCCC","#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00","darkorange")
 cols<-colo.scale(1:200,cols)
 
-lf<-list.files("outputs", full = TRUE, pattern = ".tif")
 
+lf<-list.files("outputs", full = TRUE, pattern = ".tif")
 png("sdms.png",width=16,height=10,res=400,units="in")
 par(mfrow=n2mfrow(length(lf),asp=3/2))
 r<-lapply(lf,function(i){
   r<-rast(i)
   titre<-basename(i)
   titre<-gsub(".tif","",titre)
-  titre<-sapply(strsplit(titre,"_"),function(i){paste(i[3:6],collapse="\n")})
-  plot(r,mar=c(0,0,0,0),legend=FALSE,axes=FALSE)
-  mtext(side=3,line=-3,text=titre,adj=0.05,cex=0.5)
+  titre<-sapply(strsplit(titre,"_"),function(i){paste(i[1:6],collapse="\n")})
+  plot(r,mar=c(0,0,0,0),legend=TRUE,axes=FALSE,plg=list(size=c(0.4, 1.1)))
+  mtext(side=3,line=-3,text=titre,adj=0.05,cex=0.75)
 })
 par(mfrow=c(1,1))
 dev.off()
-file.show("sdms.png")
+system("xdg-open sdms.png")
+
 
 
 res<-fromJSON("results.json") |> setDT()
@@ -41,7 +42,7 @@ betas<-lapply(split(res,res$species),function(i){
 hist(unlist(betas),breaks=20)
 
 
-res<-fromJSON("results.json") |> setDT()
+res <- fromJSON("results.json") |> setDT()
 #res[order(species,algorithm,bias,usepredictors,spatial)]
 res[rev(order(time)),]
 plot(auc~I,data=res[!is.na(auc),])

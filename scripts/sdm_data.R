@@ -48,7 +48,7 @@ if( data == "ebird") {
   if(length(y) > 1){
     y <- paste(min(y):max(y), collapse = ",")
   }
-
+  
   spp<-tolower(gsub(" ","_",params$species))
   obs <- st_read("data/total_occ_pres_only_versionR_UTM.gpkg",
                   query = paste0("SELECT * FROM total_occ_pres_only_versionR WHERE year_obs IN", paste0("(", y, ")")," AND species=\"",tolower(spp),"\""), quiet = T
@@ -72,8 +72,8 @@ if(data == "atlas"){
   source("https://object-arbutus.cloud.computecanada.ca/bq-io/atlas/parquet/bq-atlas-parquet.R")
   atlas <- atlas_remote(parquet_date = "2024-07-16")
   
-  params <- list()
-  params$species <- "Carex lurida"
+  #params<-list()
+  #params$species <- "Bonasa umbellus"
   
   genus <- strsplit(params$species, " ")[[1]][1] # temp fix to also get subspecies and string manipulations do not seem to work when dplyr remote
   species <- params$species

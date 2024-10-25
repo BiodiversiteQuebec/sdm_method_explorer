@@ -16,6 +16,8 @@ library(jsonlite)
 ### Run scripts
 #save.image(file.path(path_write,"sdm.RData"))
 
+source("scripts/sdm_utils.R", local = TRUE)
+
 if(!dir.exists("outputs")){
   dir.create("outputs")
 }
@@ -23,6 +25,7 @@ if(!dir.exists("outputs")){
 if(!dir.exists("json")){
   dir.create("json")
 }
+clean_results()
 
 if(!dir.exists("data")){
   stop("Missing data folder")
@@ -35,18 +38,11 @@ github_token_path <- "/home/frousseu/.ssh/github_token"
 repo <- "BiodiversiteQuebec/sdm_method_explorer"
 
 
-source("scripts/sdm_utils.R", local = TRUE)
+
 source("scripts/sdm_inputs.R",local = TRUE)
 runs <- 1:nrow(results)
-#i<-6 # ou 9
-#runs<-c(2:4,6:8)
-#runs<-c(2,6,10,14,18,22)
-#runs<-c(1:2)
 
-#cl<-makeCluster(4)
-#registerDoParallel(cl)
-
-nworkers<-min(c(length(runs),12))
+nworkers<-min(c(length(runs), 4))
 
 plan(multisession,workers=nworkers)
 future_lapply(runs,function(i){

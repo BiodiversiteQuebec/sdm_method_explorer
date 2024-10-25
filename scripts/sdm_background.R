@@ -43,7 +43,7 @@ if(data == "ebird"){
   
   if(params$bias == "Bias"){
     tb <- st_read("data/ebird_sampling_events.gpkg",
-                  query = paste0("SELECT * FROM ebird_sampling_events WHERE year IN", paste0("(", y, ")"),paste0(" ORDER BY RANDOM() LIMIT ",nbackground * mult)), quiet = T
+                  query = paste0("SELECT * FROM ebird_sampling_events WHERE year IN ", paste0("(", y, ")"),paste0(" ORDER BY RANDOM() LIMIT ",nbackground * mult)), quiet = T
     )
     tb<-st_transform(tb,st_crs(region))
   }else{
