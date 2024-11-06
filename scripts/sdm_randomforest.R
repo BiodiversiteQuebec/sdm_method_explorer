@@ -1,23 +1,19 @@
 
 checkpoint("Running:")
 
-library(randomForest)
-
-
-
+library(ranger)
 
 dat$presence<-factor(dat$presence)
-m<-randomForest(presence ~ .,
-                data = dat,
-                ntree = 500,
-                do.trace = TRUE) # number of trees
 
-
-#p<-predict(m,dat,type="response")
-p<-predict(m,as.matrix(unwrap(predictors)[[vars]]),type="prob")
+m <- ranger(presence ~ ., data = dat, probability = TRUE)
+newdata <- as.matrix(unwrap(predictors)[[vars]])
+notna <- apply(newdata, 1, function(i){!any(is.na(i))})
+ps <- predict(m, newdata[notna, ])
+p <- rep(NA, nrow(newdata))
+p[notna] <- ps$predictions[,2]
 
 preds<-unwrap(predictors)[[1]]
-values(preds)<-p[,2]
+values(preds)<-p#[,2]
 #plot(preds)
 
 #plot_preds()
