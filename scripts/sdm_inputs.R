@@ -41,13 +41,18 @@ target_group <- c("birds")
 
 vars_pool<-c("tmax","prec","trange","elevation","truggedness","deciduous_esa","mixed_esa","conifers_esa","shrubs_esa","crop_esa","grass_esa","builtup_esa","water_esa","sparse_esa","harsh_esa","wettree_esa","wetherbaceous_esa")
 
-algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1, 2, 3, 4)]
+algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1, 4)]
 bias<-c("Bias","noBias")[1]
 usepredictors<-c("Predictors","noPredictors")[1]
 spatial<-c("Spatial","noSpatial")[2]
 
+### background parameters
 nbackground <- 10000 # number of background points
 mult <- 2                   # multiply by this value to get more background points from which to resample to get the desired value (in cases of NAs
+
+add_effort_buffer <- TRUE # add an effort buffer or not
+effort_buffer_radius <- 500000 # in meters
+effort_buffer_n <- 5000 # number of observations in the outside buffer
 
 
 results <- expand.grid(species = sp, 

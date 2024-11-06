@@ -66,11 +66,14 @@ if(data == "ebird"){
 }
 
 
-if(TRUE){
-  b<-st_buffer(concaveman(obs),500000) |> st_union() # concavemanning before the buffer makes it much faster
-  add<-st_sample(st_difference(region,b),5000) |> st_as_sf()
-  st_geometry(add)<-"geometry"
-  tb<-rbind(tb[,"geometry"],add)
+if(add_effort_buffer){
+  b<-st_buffer(concaveman(obs), effort_buffer_radius) |> st_union() # concavemanning before the buffer makes it much faster
+  diff <- st_difference(region,b)
+  if(nrow(diff)){
+    add<-st_sample(diff, effort_buffer_n) |> st_as_sf()
+    st_geometry(add)<-"geometry"
+    tb<-rbind(tb[,"geometry"],add)
+  }
 }
 
 #plot(st_geometry(region))
