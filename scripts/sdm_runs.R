@@ -4,6 +4,8 @@
 
 # scp -p frousseu@sdm:'/home/frousseu/sdm_*' C:/Users/rouf1703/Documents/BiodiversitéQuébec/sdm_explorer 
 
+# rsync -avz --dry-run --info=progress2 --exclude '.*' --exclude='data/*' --exclude='outputs/*' -e ssh /home/frousseu/Documents/github/sdm_method_explorer/ frousseu@sdm:/home/frousseu/data/sdm_method_explorer/
+
 
 library(foreach)
 library(doParallel)
