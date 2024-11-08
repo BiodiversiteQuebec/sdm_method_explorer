@@ -6,6 +6,7 @@ library(terra)
 library(data.table)
 library(concaveman)
 
+
 nbackground <- round((nrow(obs) * background_prop) / (1 - background_prop), 0)
 if(background_cap){
   if(nbackground < background_min){
