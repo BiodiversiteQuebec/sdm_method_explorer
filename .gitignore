@@ -11,3 +11,4 @@ json
 *.tif
 *.json
 *.Rproj
+*.out
