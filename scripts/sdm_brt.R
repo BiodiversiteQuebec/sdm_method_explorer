@@ -1,24 +1,42 @@
 
 checkpoint("Running:")
 
-library(gbm)
 library(dismo)
+library(lightgbm)
 
 dat$presence<-as.integer(as.character(dat$presence))
 
-#blocks$folds_ids
+w<-c(which(dat$presence == 0), sample(which(dat$presence != 0), 15000))
+dat <- dat[w,]
 
-m <- gbm.step(data=dat, gbm.x = vars, gbm.y = "presence",#, fold.vector = blocks$folds_ids,
-                            family = "bernoulli", tree.complexity = 5,
-                            learning.rate = 0.005, bag.fraction = 0.5, step.size = 50, tolerance.method = "fixed", n.folds = 2, tolerance = 0.001, max.trees = 3000)
+X <- data.matrix(dat[ , -match(c("presence"), names(dat))])
+Y <- dat$presence
 
-#gbm.plot(m, n.plots=11, plot.layout=c(3, 4), write.title = FALSE, x.label = NULL)
-#gbm.plot.fits(m)
+m <- lightgbm(
+  data = X
+  , label = Y
+  , params = list(
+    num_leaves = 10L
+    , learning_rate = 0.02
+    , objective = "binary"
+  )
+  , nrounds = 2000L
+  , verbose = -1L
+)
 
-p <- predict(unwrap(predictors)[[vars]], m, n.trees=m$gbm.call$best.trees, type="response")
-preds <- mask(p, vect(region))
+inv_logit <- function(x) {
+  1 / (1 + exp(-x))
+}
 
-#plot_preds(F)
+
+newdata <- as.matrix(unwrap(predictors)[[vars]])
+p <- predict(m, newdata, type = "raw")
+p <- inv_logit(p)
+
+preds <- unwrap(predictors)[[1]]
+preds <- setValues(preds, p)
+preds <- mask(preds, vect(region))
+plot(preds)
 
 write_preds(preds)
 
