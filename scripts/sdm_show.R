@@ -18,15 +18,17 @@ r<-lapply(lf,function(i){
   r<-rast(i)
   titre<-basename(i)
   titre<-gsub(".tif","",titre)
-  titre<-sapply(strsplit(titre,"_"),function(i){paste(i[1:6],collapse="\n")})
-  plot(r,mar=c(0,0,0,0),legend=TRUE,axes=FALSE,plg=list(size=c(0.4, 1.1)))
-  mtext(side=3,line=-3,text=titre,adj=0.05,cex=0.75)
+  titre<-sapply(strsplit(titre,"_"),function(i){paste(c(paste(i[1:2], collapse = " "), i[3:6]), collapse="\n")})
+  titre <- gsub("(^[[:alpha:]])", "\\U\\1", titre, perl=TRUE)
+  plot(r,mar=c(0,0.5,0.5,0),legend=TRUE,axes=FALSE,plg=list(size=c(0.4, 1.1)))
+  text(par("usr")[1],par("usr")[4],label=titre,adj=c(0,1),cex=0.85,xpd=TRUE)
 })
 par(mfrow=c(1,1))
 dev.off()
 system("xdg-open sdms.png")
 
-
+plot(r,mar=c(0,0,0,0),legend=TRUE,axes=FALSE,plg=list(size=c(0.4, 1.1)))
+text(par("usr")[1],par("usr")[4],label=titre,adj=c(0,1),cex=0.75,xpd=TRUE)
 
 res<-fromJSON("results.json") |> setDT()
 res[rev(order(time)),]
