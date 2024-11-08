@@ -47,8 +47,12 @@ usepredictors<-c("Predictors","noPredictors")[1]
 spatial<-c("Spatial","noSpatial")[2]
 
 ### background parameters
-nbackground <- 10000 # number of background points
-mult <- 2                   # multiply by this value to get more background points from which to resample to get the desired value (in cases of NAs
+background_prop <- 0.9 # targeted proportion of background points for the model 
+background_cap <- TRUE # if TRUE, will cap the nb of background points with the min/max 
+#background_n <- 10000 # number of background points
+background_min <- 5000 # overall min nb of background points
+background_max <- 2000000 # overall max nb of background points
+
 
 add_effort_buffer <- TRUE # add an effort buffer or not
 effort_buffer_radius <- 500000 # in meters

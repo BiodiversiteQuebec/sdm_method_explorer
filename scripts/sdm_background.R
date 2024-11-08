@@ -6,6 +6,18 @@ library(terra)
 library(data.table)
 library(concaveman)
 
+nbackground <- round((nrow(obs) * background_prop) / (1 - background_prop), 0)
+if(background_cap){
+  if(nbackground < background_min){
+    nbackground <- background_min
+  }
+  if(nbackground > background_max){
+    nbackground <- background_max
+  }
+}
+  
+mult <- 2 # multiply by this value to get more background points from which to resample to get the desired value (in cases of NAs)
+
 if(data == "gbif"){
 
   gbif<-rast("https://object-arbutus.cloud.computecanada.ca/bq-io/io/gbif_heatmaps/gbif_plants_density_06-2022.tif")
