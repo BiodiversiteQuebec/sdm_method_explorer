@@ -6,9 +6,6 @@ library(lightgbm)
 
 dat$presence<-as.integer(as.character(dat$presence))
 
-w<-c(which(dat$presence == 0), sample(which(dat$presence != 0), 15000))
-dat <- dat[w,]
-
 X <- data.matrix(dat[ , -match(c("presence"), names(dat))])
 Y <- dat$presence
 
@@ -36,7 +33,7 @@ p <- inv_logit(p)
 preds <- unwrap(predictors)[[1]]
 preds <- setValues(preds, p)
 preds <- mask(preds, vect(region))
-plot(preds)
+#plot(preds)
 
 write_preds(preds)
 
