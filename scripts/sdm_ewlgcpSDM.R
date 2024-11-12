@@ -34,7 +34,7 @@ dmesh<-dmesh_mesh(mesh)
 dmesh<-dmesh_weights(dmesh,region)
 
 ### Summarize predictors
-dmesh<-dmesh_predictors(dmesh,unwrap(predictors)[[vars]])
+dmesh<-dmesh_predictors(dmesh,unwrap(predictors)[[vars]], progress = FALSE)
 
 
 #dm<-params$dmesh
