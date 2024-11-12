@@ -22,15 +22,16 @@ species<-c("Bonasa umbellus", "Catharus bicknelli", "Catharus fuscescens",
 sp<-species[10:length(species)]
 #sp<-c("Bonasa umbellus","Falcipennis canadensis","Setophaga americana", "Catharus fuscescens")
 #sp<-c("Melospiza melodia")
-#sp<-species
-sp<-c("Bonasa umbellus")
-
+sp <- species#[1]
+#sp<-c("Catharus bicknelli")
+#sp <- species#[11]
 
 rerun<-TRUE
 
 years <- list( # year wanted or a vector of years, has to be a range for gbif data
-  2017:2018,
-  2019:2020
+  2006:2010,
+  2011:2015,
+  2016:2020
 )
 
 yearparams <- sapply(years, function(y){
@@ -41,17 +42,17 @@ target_group <- c("birds")
 
 vars_pool<-c("tmax","prec","trange","elevation","truggedness","deciduous_esa","mixed_esa","conifers_esa","shrubs_esa","crop_esa","grass_esa","builtup_esa","water_esa","sparse_esa","harsh_esa","wettree_esa","wetherbaceous_esa")
 
-algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1, 4)]
-bias<-c("Bias","noBias")[1]
-usepredictors<-c("Predictors","noPredictors")[1]
-spatial<-c("Spatial","noSpatial")[2]
+algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1:4)]
+bias<-c("Bias","noBias")[1:2]
+usepredictors<-c("Predictors","noPredictors")[1:2]
+spatial<-c("Spatial","noSpatial")[1:2]
 
 ### background parameters
 background_prop <- 0.9 # targeted proportion of background points for the model 
 background_cap <- TRUE # if TRUE, will cap the nb of background points with the min/max 
 #background_n <- 10000 # number of background points
 background_min <- 5000 # overall min nb of background points
-background_max <- 2000000 # overall max nb of background points
+background_max <- 1000000 # overall max nb of background points
 
 
 add_effort_buffer <- TRUE # add an effort buffer or not
@@ -70,7 +71,11 @@ results <- expand.grid(species = sp,
 
 results <- results[apply(results[,c("usepredictors","spatial")],1,function(i){!all(c("noPredictors","noSpatial")==i)}),] # remove nopredictors and nospatial
 
-
+### randomize cases
+if(TRUE){
+  set.seed(1234)
+  results <- results[sample(1:nrow(results)), ]
+}
 
 if(!rerun){
   x <- fromJSON("results.json") |> setDT()
