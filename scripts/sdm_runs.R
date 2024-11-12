@@ -8,6 +8,9 @@
 
 # rsync -avzu --dry-run --info=progress2 --exclude '.*' --exclude='data/*' --exclude='outputs/*' --exclude='json/*' -e ssh /home/frousseu/Documents/github/sdm_method_explorer/scripts/*.R frousseu@sdm:/home/frousseu/data/sdm_method_explorer/scripts/
 
+# nohup R CMD BATCH --no-save scripts/sdm_runs.R log.out &
+
+# nohup R CMD BATCH --no-save scripts/sdm_runs.R "log_$(TZ='America/New_York' date +'%Y-%m-%d_%H-%M-%S').out" &
 
 library(foreach)
 library(doParallel)
@@ -42,7 +45,6 @@ github_token_path <- "/home/frousseu/.ssh/github_token"
 repo <- "BiodiversiteQuebec/sdm_method_explorer"
 
 
-
 source("scripts/sdm_inputs.R",local = TRUE)
 runs <- 1:nrow(results)
 
@@ -52,7 +54,7 @@ plan(multisession,workers=nworkers)
 future_lapply(runs,function(i){
 #foreach(i=runs) %dopar% {
   
-  message("TESTING")
+  t1 <- Sys.time()
   
   source("scripts/sdm_utils.R",local = TRUE)
   source("scripts/sdm_inputs.R",local = TRUE)
@@ -68,6 +70,13 @@ future_lapply(runs,function(i){
   params <- lapply(as.list(results),"[",i)
   
   source("scripts/sdm_data.R",local=TRUE)
+  
+  if(nrow(obs) < 5){
+    checkpoint("Aborting:")
+    cat("\nToo few observations, returning NULL")
+    return(NULL)
+  }
+  
   source("scripts/sdm_background.R",local=TRUE)
   
   switch(params$algorithm,
@@ -83,7 +92,15 @@ future_lapply(runs,function(i){
          ewlgcpSDM={
            source("scripts/sdm_ewlgcpSDM.R",local=TRUE)
          }
+         
+          
+              
   )
+  
+  t2 <- Sys.time() 
+  checkpoint("Took:")
+  message(paste("Minutes:", round(as.numeric(difftime(t2, t1, units = "mins")), 2), "\n"))
+  
 },future.conditions="message")
 
 plan(sequential)
