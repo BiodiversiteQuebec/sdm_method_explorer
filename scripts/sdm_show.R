@@ -1,4 +1,7 @@
 
+# free -m | awk '/Mem/{print $3/$2}'
+# grep -E 'Minutes:|Done:' log_2024-11-12_11-58-18.out | sort
+
 library(terra)
 #library(FRutils)
 library(data.table)
@@ -18,7 +21,7 @@ r<-lapply(lf,function(i){
   r<-rast(i)
   titre<-basename(i)
   titre<-gsub(".tif","",titre)
-  titre<-sapply(strsplit(titre,"_"),function(i){paste(c(paste(i[1:2], collapse = " "), i[3:6]), collapse="\n")})
+  titre<-sapply(strsplit(titre,"_"),function(i){paste(c(paste(i[1:2], collapse = " "), i[3:7]), collapse="\n")})
   titre <- gsub("(^[[:alpha:]])", "\\U\\1", titre, perl=TRUE)
   plot(r,mar=c(0,0.5,0.5,0),legend=TRUE,axes=FALSE,plg=list(size=c(0.4, 1.1)))
   text(par("usr")[1],par("usr")[4],label=titre,adj=c(0,1),cex=0.85,xpd=TRUE)
