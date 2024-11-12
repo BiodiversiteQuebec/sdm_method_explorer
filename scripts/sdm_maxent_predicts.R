@@ -1,6 +1,8 @@
 
 checkpoint("Running:")
 
+options(java.parameters = "-Xmx40g")
+
 library(predicts)
 
 #predictors2<-aggregate(predictors,2,na.rm=TRUE)
