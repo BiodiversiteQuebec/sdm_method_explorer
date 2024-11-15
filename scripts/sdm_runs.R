@@ -23,7 +23,7 @@ library(jsonlite)
 ### Run scripts
 #save.image(file.path(path_write,"sdm.RData"))
 
-source("scripts/sdm_utils.R", local = TRUE)
+source("scripts/sdm_utils.R")
 
 if(!dir.exists("outputs")){
   dir.create("outputs")
@@ -45,10 +45,16 @@ github_token_path <- "/home/frousseu/.ssh/github_token"
 repo <- "BiodiversiteQuebec/sdm_method_explorer"
 
 
-source("scripts/sdm_inputs.R",local = TRUE)
+source("scripts/sdm_inputs.R")
 runs <- 1:nrow(results)
 
-nworkers<-min(c(length(runs), 4))
+reposnapshot <- get_repo_snapshot(repo, github_user, github_token_path)
+results$reposnapshot <- reposnapshot
+
+source("scripts/sdm_prelim.R")
+source("scripts/sdm_predictors.R")
+
+nworkers<-min(c(length(runs), 8))
 
 plan(multisession,workers=nworkers)
 future_lapply(runs,function(i){
@@ -56,17 +62,8 @@ future_lapply(runs,function(i){
   
   t1 <- Sys.time()
   
-  source("scripts/sdm_utils.R",local = TRUE)
-  source("scripts/sdm_inputs.R",local = TRUE)
-  
-  reposnapshot <- get_repo_snapshot(repo, github_user, github_token_path)
-  results$reposnapshot <- reposnapshot
-  
-  source("scripts/sdm_prelim.R", local = TRUE)
-  source("scripts/sdm_predictors.R",local = TRUE)
-  
-  #load(file.path(path_write,"sdm.RData"))
-  
+  source("scripts/sdm_utils.R", local = TRUE)
+
   params <- lapply(as.list(results),"[",i)
   
   source("scripts/sdm_data.R",local=TRUE)
@@ -98,10 +95,9 @@ future_lapply(runs,function(i){
   )
   
   t2 <- Sys.time() 
-  checkpoint("Took:")
   message(paste("Minutes:", round(as.numeric(difftime(t2, t1, units = "mins")), 2), "\n"))
   
-},future.conditions="message")
+},future.conditions="message", future.globals = ls(), future.packages = names(sessionInfo()$otherPkgs))
 
 plan(sequential)
 

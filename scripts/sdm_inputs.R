@@ -1,4 +1,5 @@
 
+
 ### List of inputs for models
 
 message(paste("Running: inputs","/",Sys.time(),"\n"))
@@ -22,16 +23,16 @@ species<-c("Bonasa umbellus", "Catharus bicknelli", "Catharus fuscescens",
 sp<-species[10:length(species)]
 #sp<-c("Bonasa umbellus","Falcipennis canadensis","Setophaga americana", "Catharus fuscescens")
 #sp<-c("Melospiza melodia")
-sp <- species#[1]
+sp <- species[1:2]
 #sp<-c("Catharus bicknelli")
 #sp <- species#[11]
 
-rerun<-TRUE
+rerun <- FALSE
 
 years <- list( # year wanted or a vector of years, has to be a range for gbif data
-  2006:2010,
-  2011:2015,
-  2016:2020
+  2016:2018,
+  2017:2019,
+  2018:2020
 )
 
 yearparams <- sapply(years, function(y){
@@ -42,10 +43,10 @@ target_group <- c("birds")
 
 vars_pool<-c("tmax","prec","trange","elevation","truggedness","deciduous_esa","mixed_esa","conifers_esa","shrubs_esa","crop_esa","grass_esa","builtup_esa","water_esa","sparse_esa","harsh_esa","wettree_esa","wetherbaceous_esa")
 
-algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1:4)]
-bias<-c("Bias","noBias")[1:2]
-usepredictors<-c("Predictors","noPredictors")[1:2]
-spatial<-c("Spatial","noSpatial")[1:2]
+algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1)]
+bias<-c("Bias","noBias")[1]
+usepredictors<-c("Predictors","noPredictors")[1]
+spatial<-c("Spatial","noSpatial")[2]
 
 ### background parameters
 background_prop <- 0.9 # targeted proportion of background points for the model 
@@ -72,15 +73,31 @@ results <- expand.grid(species = sp,
 results <- results[apply(results[,c("usepredictors","spatial")],1,function(i){!all(c("noPredictors","noSpatial")==i)}),] # remove nopredictors and nospatial
 
 ### randomize cases
-if(TRUE){
+if(FALSE){
   set.seed(1234)
   results <- results[sample(1:nrow(results)), ]
 }
 
 if(!rerun){
-  x <- fromJSON("results.json") |> setDT()
-  results <- fsetdiff(setDT(results), x[, names(results), with = FALSE], all = FALSE) |> as.data.frame()
+  #x <- fromJSON("results.json") |> setDT()
+  #results <- fsetdiff(setDT(results), x[, names(results), with = FALSE], all = FALSE) |> as.data.frame()
+
+  x <- list.files("outputs", pattern = ".tif") |>
+          gsub(".tif", "", x = _) |>
+    strsplit("_") |>
+    lapply(function(i){
+      c(sub("^(\\w)", "\\U\\1", paste(i[1:2], collapse = " "), perl = TRUE), i[3:length(i)])
+    }) |>
+    do.call("rbind", args = _) |>
+    as.data.table() |>
+    setnames(c("species", "years", "algorithm", "usepredictors", "bias", "spatial"))
+    
+  results <- fsetdiff(setDT(results[, names(x)]), x, all = FALSE) |> as.data.frame()
+
+
 }
+
+
 
 
 

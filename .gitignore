@@ -12,3 +12,6 @@ json
 *.json
 *.Rproj
 *.out
+*.zip
+*.memory_usage
+*.log
