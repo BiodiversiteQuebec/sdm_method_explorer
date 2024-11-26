@@ -17,12 +17,12 @@ plot_preds<-function(occs=TRUE){
 }
 
 
-write_preds<-function(preds){
-  filename<-paste(tolower(gsub(" ","_",params$species)),params$year,params$algorithm,params$usepredictors,params$bias,params$spatial,sep="_") |> paste0(".tif")
-  filepath<-file.path("outputs",filename)
-  res<-crop(preds,vect(region),mask=TRUE)
-  res<-mask(res,vect(lakes),inverse=TRUE)
-  writeRaster(res,filepath,overwrite=TRUE)    
+write_preds <- function(preds){
+  filename <- paste(tolower(gsub(" ","_",params$species)), params$year, params$algorithm, params$usepredictors, params$bias,params$spatial,sep="_") |> paste0(".tif")
+  filepath <- file.path("outputs",filename)
+  res <- crop(preds,vect(region), mask = TRUE)
+  res <- mask(res, vect(lakes), inverse = TRUE)
+  writeRaster(res, filepath, filetype = "COG", overwrite = TRUE)    
 }
 
 plot_vb<-function(occs=TRUE){
