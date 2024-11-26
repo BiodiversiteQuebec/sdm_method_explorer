@@ -16,9 +16,8 @@ plot_preds<-function(occs=TRUE){
   plot(st_geometry(qc),border=adjustcolor("black",0.5),add=TRUE)
 }
 
-
 write_preds <- function(preds){
-  filename <- paste(tolower(gsub(" ","_",params$species)), params$year, params$algorithm, params$usepredictors, params$bias,params$spatial,sep="_") |> paste0(".tif")
+  filename <- paste(params$group, tolower(gsub(" ","_",params$species)), params$year, params$algorithm, params$usepredictors, params$bias,params$spatial,sep="_") |> paste0(".tif")
   filepath <- file.path("outputs",filename)
   res <- crop(preds,vect(region), mask = TRUE)
   res <- mask(res, vect(lakes), inverse = TRUE)

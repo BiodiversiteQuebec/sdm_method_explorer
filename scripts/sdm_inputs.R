@@ -23,7 +23,7 @@ species<-c("Bonasa umbellus", "Catharus bicknelli", "Catharus fuscescens",
 #sp<-species[10:length(species)]
 #sp<-c("Bonasa umbellus","Falcipennis canadensis","Setophaga americana", "Catharus fuscescens")
 #sp<-c("Melospiza melodia")
-sp <- species[26]#[1:20]
+sp <- species[24:25]#[1:20]
 #sp<-c("Catharus bicknelli")
 #sp <- species#[11]
 
@@ -37,7 +37,9 @@ yearparams <- sapply(years, function(y){
   ifelse(length(y) > 1, paste(min(y), max(y), sep = "-"), y) 
 })
 
+group <- "birds"
 target_group <- c("birds")
+
 
 #vars_pool<-c("tmax","prec","trange","elevation","truggedness","deciduous_esa","mixed_esa","conifers_esa","shrubs_esa","crop_esa","grass_esa","builtup_esa","water_esa","sparse_esa","harsh_esa","wettree_esa","wetherbaceous_esa")
 
@@ -65,7 +67,8 @@ effort_buffer_n <- 5000 # number of observations in the outside buffer
 
 dmesh_resolution <- 0.005
 
-results <- expand.grid(species = sp, 
+results <- expand.grid(group = group,
+                       species = sp, 
                        target_group = target_group, 
                        years = yearparams, 
                        algorithm = algorithms, 
@@ -90,11 +93,11 @@ if(!rerun){
           gsub(".tif", "", x = _) |>
     strsplit("_") |>
     lapply(function(i){
-      c(sub("^(\\w)", "\\U\\1", paste(i[1:2], collapse = " "), perl = TRUE), i[3:length(i)])
+      c(i[1], sub("^(\\w)", "\\U\\1", paste(i[2:3], collapse = " "), perl = TRUE), i[4:length(i)])
     }) |>
     do.call("rbind", args = _) |>
     as.data.table() |>
-    setnames(c("species", "years", "algorithm", "usepredictors", "bias", "spatial"))
+    setnames(c("group", "species", "years", "algorithm", "usepredictors", "bias", "spatial"))
     
   results <- fsetdiff(setDT(results[, names(x)]), x, all = FALSE) |> as.data.frame()
 
