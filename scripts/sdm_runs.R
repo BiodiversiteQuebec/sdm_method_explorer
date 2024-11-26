@@ -18,7 +18,7 @@ library(future)
 library(future.apply)
 library(data.table)
 library(jsonlite)
-library(jsonlite)
+#library(future.callr) # not really working for some reason
 
 ### Run scripts
 #save.image(file.path(path_write,"sdm.RData"))
@@ -54,9 +54,10 @@ results$reposnapshot <- reposnapshot
 source("scripts/sdm_prelim.R")
 source("scripts/sdm_predictors.R")
 
-nworkers<-min(c(length(runs), 8))
-
-plan(multisession,workers=nworkers)
+nworkers<-min(c(length(runs), 3))
+#options(mc.cores=nworkers)
+options(future.globals.maxSize = 5000 * 1024 ^ 2)
+plan(multisession, workers = nworkers)
 future_lapply(runs,function(i){
 #foreach(i=runs) %dopar% {
   

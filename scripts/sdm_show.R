@@ -14,7 +14,7 @@ cols<-c("#CCCCCC","#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743
 cols<-colo.scale(1:200,cols)
 
 
-lf<-list.files("outputs", full = TRUE, pattern = ".tif")
+lf<-list.files("outputs", full = TRUE, pattern = "1950-2024") |> grep("ewlgcp", x = _, value = TRUE)
 png("sdms.png",width=16,height=10,res=400,units="in")
 par(mfrow=n2mfrow(length(lf),asp=3/2))
 r<-lapply(lf,function(i){

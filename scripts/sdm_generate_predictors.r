@@ -118,7 +118,7 @@ wc <- worldclim_country("CAN", path = "data", var = "bio")
 wc <- wc[[c(1, 4, 5, 7, 10, 12)]]
 wc <- project(wc, p[[1]])
 names(wc) <- c("tmean", "tseason", "tmax", "trange", "twarm", "prec")
-wc <- wc[[c("tmean", "prec")]]
+wc <- wc[[c("tmean", "tmax", "prec")]]
 p <- c(p, wc)
 
 

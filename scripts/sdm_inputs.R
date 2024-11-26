@@ -20,19 +20,17 @@ species<-c("Bonasa umbellus", "Catharus bicknelli", "Catharus fuscescens",
            "Setophaga petechia", "Setophaga pinus", "Setophaga ruticilla", 
            "Setophaga striata", "Setophaga tigrina", "Setophaga virens")
 
-sp<-species[10:length(species)]
+#sp<-species[10:length(species)]
 #sp<-c("Bonasa umbellus","Falcipennis canadensis","Setophaga americana", "Catharus fuscescens")
 #sp<-c("Melospiza melodia")
-sp <- species[1:2]
+sp <- species[26]#[1:20]
 #sp<-c("Catharus bicknelli")
 #sp <- species#[11]
 
 rerun <- FALSE
 
 years <- list( # year wanted or a vector of years, has to be a range for gbif data
-  2016:2018,
-  2017:2019,
-  2018:2020
+  1950:2024
 )
 
 yearparams <- sapply(years, function(y){
@@ -41,7 +39,13 @@ yearparams <- sapply(years, function(y){
 
 target_group <- c("birds")
 
-vars_pool<-c("tmax","prec","trange","elevation","truggedness","deciduous_esa","mixed_esa","conifers_esa","shrubs_esa","crop_esa","grass_esa","builtup_esa","water_esa","sparse_esa","harsh_esa","wettree_esa","wetherbaceous_esa")
+#vars_pool<-c("tmax","prec","trange","elevation","truggedness","deciduous_esa","mixed_esa","conifers_esa","shrubs_esa","crop_esa","grass_esa","builtup_esa","water_esa","sparse_esa","harsh_esa","wettree_esa","wetherbaceous_esa")
+
+vars_pool<-c("conifers", "taiga", "deciduous", "mixed", "temperate_shrubland", 
+"temperate_grassland", "polar_shrubland", "polar_grassland", 
+"polar_barren", "wetland", "cropland", "barren", "urban", "water", 
+"snow", "distfsl", "tmean", "prec", "geomflat", "elevation", 
+"distroads", "sand")
 
 algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1)]
 bias<-c("Bias","noBias")[1]
@@ -55,11 +59,11 @@ background_cap <- TRUE # if TRUE, will cap the nb of background points with the 
 background_min <- 5000 # overall min nb of background points
 background_max <- 1000000 # overall max nb of background points
 
-
 add_effort_buffer <- TRUE # add an effort buffer or not
 effort_buffer_radius <- 500000 # in meters
 effort_buffer_n <- 5000 # number of observations in the outside buffer
 
+dmesh_resolution <- 0.005
 
 results <- expand.grid(species = sp, 
                        target_group = target_group, 
