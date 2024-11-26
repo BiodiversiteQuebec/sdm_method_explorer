@@ -21,6 +21,7 @@ write_preds <- function(preds){
   filepath <- file.path("outputs",filename)
   res <- crop(preds,vect(region), mask = TRUE)
   res <- mask(res, vect(lakes), inverse = TRUE)
+  metags(res) <- paste(names(params), params, sep = "=")
   writeRaster(res, filepath, filetype = "COG", overwrite = TRUE)    
 }
 
