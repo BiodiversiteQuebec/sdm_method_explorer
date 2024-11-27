@@ -3,6 +3,7 @@ message(paste("Running: utils","/",Sys.time(),"\n"))
 
 library(raster)
 library(dismo)
+library(ebirdst)
 
 
 ### plot preds
@@ -17,7 +18,7 @@ plot_preds<-function(occs=TRUE){
 }
 
 write_preds <- function(preds){
-  filename <- paste(params$group, tolower(gsub(" ","_",params$species)), params$year, params$algorithm, params$usepredictors, params$bias,params$spatial,sep="_") |> paste0(".tif")
+  filename <- paste(params$group, tolower(gsub(" ","_",params$species)), params$years, params$period, params$period_dates, params$algorithm, params$usepredictors, params$bias,params$spatial,sep="_") |> paste0(".tif")
   filepath <- file.path("outputs",filename)
   res <- crop(preds,vect(region), mask = TRUE)
   res <- mask(res, vect(lakes), inverse = TRUE)
@@ -128,5 +129,34 @@ get_repo_snapshot <- function(repo, user, tokenpath, n = 10){
 }
 
 
+get_ebirdst <- function(){
+  eb <- ebirdst_runs |> as.data.table()
+  eb[ , breeding := paste(gsub("-", "", substr(breeding_start, 6, 10)), gsub("-", "", substr(breeding_end, 6, 10)), sep = "-")]
+  eb[ , postbreeding := paste(gsub("-", "", substr(postbreeding_migration_start, 6, 10)), gsub("-", "", substr(postbreeding_migration_end, 6, 10)), sep = "-")]
+  eb[ , prebreeding := paste(gsub("-", "", substr(prebreeding_migration_start, 6, 10)), gsub("-", "", substr(prebreeding_migration_end, 6, 10)), sep = "-")]
+  eb[ , nonbreeding := paste(gsub("-", "", substr(nonbreeding_start, 6, 10)), gsub("-", "", substr(nonbreeding_end, 6, 10)), sep = "-")]
+  eb[breeding == "NA-NA", breeding := NA]
+  eb[prebreeding == "NA-NA", prebreeding := NA]
+  eb[postbreeding == "NA-NA", postbreeding := NA]
+  eb[nonbreeding == "NA-NA", nonbreeding := NA]
+  eb <- eb[ ,.(species_code, scientific_name, common_name, is_resident, breeding, prebreeding, postbreeding, nonbreeding)]
+  eb
+}
 
 
+get_period <- function(x){
+  #period_dates <- "0201-0916"
+  period_dates <- params$period_dates
+  d <- strsplit(period_dates, "-")[[1]]
+  d <- paste(substr(d, 1, 2), substr(d, 3, 4), sep = "-")
+  if(d[1] < d[2]){
+    dates <- seq.Date(as.Date(paste0("2000-", d[1])), as.Date(paste0("2000-", d[2])), by = 1) |>
+      as.character() |>
+      substr(6, 10)
+  } else {
+    dates <- seq.Date(as.Date(paste0("1999-", d[1])), as.Date(paste0("2000-", d[2])), by = 1) |>
+      as.character() |>
+      substr(6, 10)
+  }
+  x[substr(x$date, 6, 10) %in% dates, ]
+}

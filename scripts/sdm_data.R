@@ -99,3 +99,5 @@ if(data == "atlas"){
   
 }
 
+nobs <- nrow(obs) # initial nb of obs before subsetting for the period
+obs <- get_period(obs)

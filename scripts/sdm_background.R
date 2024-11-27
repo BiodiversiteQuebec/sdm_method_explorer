@@ -7,7 +7,7 @@ library(data.table)
 library(concaveman)
 
 
-nbackground <- round((nrow(obs) * background_prop) / (1 - background_prop), 0)
+nbackground <- round((nobs * background_prop) / (1 - background_prop), 0)
 if(background_cap){
   if(nbackground < background_min){
     nbackground <- background_min
@@ -17,7 +17,7 @@ if(background_cap){
   }
 }
   
-mult <- 2 # multiply by this value to get more background points from which to resample to get the desired value (in cases of NAs)
+mult <- 50 # multiply by this value to get more background points from which to resample to get the desired value (in cases of NAs)
 
 if(data == "gbif"){
 
@@ -35,20 +35,15 @@ if(data == "gbif"){
     tb <- st_sample(region, nbackground * mult)  
   }
   tb <- tb[region,] # keep what's in region
+  tb <- get_period(tb)
   tb <- tb[sample(1:nrow(tb), min(c(nbackground, nrow(tb)))), ] # keep the specified number of background points
 
 }
 
-#ese<-st_layers("C:/Users/rouf1703/Downloads/ebird_sampling_events.gpkg")
-#ese<-st_read("C:/Users/rouf1703/Downloads/ebird_sampling_events.gpkg")
 
 
 if(data == "ebird"){
-  #tb <- st_read("C:/Users/rouf1703/Downloads/vbellavance/ebird_sampling_events.gpkg",
-  #              query = paste0("SELECT * ebird_sampling_events WHERE year=", year,paste0(" ORDER BY RANDOM() LIMIT ",nbackground*mult)), quiet = T
-  #)
-  
-  
+
   y <- as.integer(strsplit(params$years, "-")[[1]])
   if(length(y) > 1){
     y <- paste(min(y):max(y), collapse = ",")
@@ -58,13 +53,14 @@ if(data == "ebird"){
     tb <- st_read("data/ebird_sampling_events.gpkg",
                   query = paste0("SELECT * FROM ebird_sampling_events WHERE year IN ", paste0("(", y, ")"),paste0(" ORDER BY RANDOM() LIMIT ",nbackground * mult)), quiet = T
     )
-    tb<-st_transform(tb,st_crs(region))
+    tb<-st_transform(tb, st_crs(region))
   }else{
-    tb<-st_sample(region,nbackground*mult) |> st_as_sf()
+    tb<-st_sample(region, nbackground*mult) |> st_as_sf()
   }
-  tb<-tb[region,]
-  tb<-tb[sample(1:nrow(tb),min(c(nbackground,nrow(tb)))),]
-  st_geometry(tb)<-"geometry"
+  tb <- tb[region, ]
+  tb <- get_period(tb)
+  tb <- tb[sample(1:nrow(tb), min(c(nbackground, nrow(tb)))), ]
+  st_geometry(tb) <- "geometry"
   
   ### if using csv and fread
   #x<-checklists[year%in%year & month_day>="06-01" & month_day<="08-15",]
@@ -79,40 +75,32 @@ if(data == "ebird"){
 }
 
 
+
+
+
 if(add_effort_buffer){
-  b<-st_buffer(concaveman(obs), effort_buffer_radius) |> st_union() # concavemanning before the buffer makes it much faster
-  diff <- st_difference(region,b)
+  b <- st_buffer(concaveman(obs), effort_buffer_radius) |> st_union() # concavemanning before the buffer makes it much faster
+  diff <- st_difference(region, b)
   if(nrow(diff)){
-    add<-st_sample(diff, effort_buffer_n) |> st_as_sf()
-    st_geometry(add)<-"geometry"
-    tb<-rbind(tb[,"geometry"],add)
+    add <- st_sample(diff, effort_buffer_n) |> st_as_sf()
+    st_geometry(add) <- "geometry"
+    tb <- rbind(tb[, "geometry"], add)
   }
 }
 
-#plot(st_geometry(region))
-#plot(st_geometry(tb),add=TRUE,cex=0.5)
-#plot(st_geometry(add),add=TRUE,cex=0.5,col="red")
 
+bg <- rbind(obs[,"geometry"], tb[,"geometry"])
 
+d <- cbind(presence = c(rep(1, nrow(obs)), rep(0, nrow(tb))), bg)
+e <- terra::extract(unwrap(predictors), vect(d), ID = FALSE)
+nas <- !apply(e, 1, function(i){any(is.na(i))})
+d <- cbind(d, e)
+d <- d[nas, ]
+w <- which(d$presence == 0)
+s <- sample(w, min(c(length(w), nbackground * mult))) 
+k <- which(d$presence == 1)
+d <- d[c(k,s), ]
+dat <- st_drop_geometry(d)
 
-
-#plot(st_geometry(tb),col=adjustcolor("black",0.99),pch=16)
-#plot(st_geometry(obs),col=adjustcolor("forestgreen",0.5),pch=16,add=TRUE)
-
-
-bg<-rbind(obs[,"geometry"],tb[,"geometry"])
-
-d<-cbind(presence=c(rep(1,nrow(obs)),rep(0,nrow(tb))),bg)
-e<-terra::extract(unwrap(predictors),vect(d),ID=FALSE)
-nas<-!apply(e,1,function(i){any(is.na(i))})
-d<-cbind(d,e)
-d<-d[nas,]
-w<-which(d$presence==0)
-s<-sample(w,min(c(length(w),nbackground*mult))) 
-k<-which(d$presence==1)
-d<-d[c(k,s),]
-dat<-st_drop_geometry(d)
-
-
-vars<-adjust_vars(vars_pool,params)
-dat<-dat[,c("presence",vars)]
+vars <- adjust_vars(vars_pool, params)
+dat <- dat[, c("presence", vars)]
