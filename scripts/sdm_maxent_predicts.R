@@ -1,7 +1,7 @@
 
 checkpoint("Running:")
 
-options(java.parameters = "-Xmx40g")
+options(java.parameters = "-Xmx100g")
 
 library(predicts)
 
@@ -14,7 +14,8 @@ m <- MaxEnt(unwrap(predictors)[[vars]],
              removeDuplicates=TRUE,
              silent=FALSE,
              #args=c("replicatetype=bootstrap","replicates=1","threads=4")
-             args=c("linear","quadratic","product","hinge","nothreshold","replicatetype=bootstrap","replicates=1","threads=4")
+             #args=c("linear","quadratic","product","hinge","nothreshold","replicatetype=bootstrap","replicates=1","threads=4")
+             args=c("linear","quadratic","hinge","replicatetype=bootstrap","replicates=1","threads=4")
      )
 
 #newdat<-predictors[[vars]] |> as.data.frame() |> colMeans(na.rm=TRUE) |> as.list() |> data.frame() 
