@@ -224,7 +224,7 @@ p2 <- setValues(p, xynotna[nn, -(1:2)])
 rm(xynotna, nn)
 gc();gc()
 
-p <- mask(p, st_transform(region, st_crs(p)))
+p <- mask(p2, st_transform(region, st_crs(p)))
 
 #writeRaster(p, "data/predictors_300.tif", overwrite = TRUE)
 
@@ -241,7 +241,10 @@ p <- rast("data/predictors_300.tif")
 
 #r <- rast(matrix(1:25, ncol = 5))
 
+#p <- crop(p, region, mask = TRUE)
 
+#colSums(is.na(values(p)))
 
-
-
+#plot(p$sand)
+#plot(st_geometry(region), add = TRUE)
+#plot(st_geometry(lakes), col = "cyan", add = TRUE)
