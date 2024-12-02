@@ -23,7 +23,7 @@ write_preds <- function(preds){
   res <- crop(preds,vect(region), mask = TRUE)
   res <- mask(res, vect(lakes), inverse = TRUE)
   metags(res) <- paste(names(params), params, sep = "=")
-  writeRaster(res, filepath, filetype = "COG", overwrite = TRUE)    
+  writeRaster(res, filepath, overwrite = TRUE)    
 }
 
 plot_vb<-function(occs=TRUE){
