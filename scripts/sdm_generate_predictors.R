@@ -4,10 +4,10 @@
 
 library(terra)
 library(ranger)
-library(mapview)
+#library(mapview)
 library(rmapshaper)
-library(knitr)
-library(gdalcubes)
+#library(knitr)
+#library(gdalcubes)
 library(rstac)
 library(stars)
 library(FNN)
@@ -20,7 +20,12 @@ tmpFiles(TRUE, TRUE, TRUE, TRUE)
 ##########################################################
 ### CEC Landcover ########################################
 
-if(FALSE){
+source("scripts/sdm_utils.R")
+source("scripts/sdm_inputs.R")
+source("scripts/sdm_prelim.R")
+
+
+if(TRUE){
   
   #cec <- rast("/vsicurl/https://object-arbutus.cloud.computecanada.ca/bq-io/io/CEC_land_cover/NA_NALCMS_landcover_2020_30m.tif")
   
@@ -226,7 +231,7 @@ gc();gc()
 
 p <- mask(p2, st_transform(region, st_crs(p)))
 
-#writeRaster(p, "data/predictors_300.tif", overwrite = TRUE)
+writeRaster(p, "data/predictors_300.tif", overwrite = TRUE)
 
 
 }
