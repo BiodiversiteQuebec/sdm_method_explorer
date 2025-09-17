@@ -32,7 +32,7 @@ p <- inv_logit(p)
 
 preds <- unwrap(predictors)[[1]]
 preds <- setValues(preds, p)
-preds <- mask(preds, vect(region))
+preds <- mask(preds, region)
 #plot(preds)
 
 write_preds(preds)

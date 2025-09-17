@@ -13,23 +13,23 @@ dmesh <- dmesh_effort(dmesh, obs = d[d$presence == 1, ], background =d[d$presenc
 if(params$usepredictors=="Predictors"){
   subvars <- c("conifers", "taiga", "deciduous", 
 "temperate_grassland", "wetland", "cropland", "urban", "water", "distfsl", "tmean", "geomflat", "elevation", "sand")
-  form<-paste("y ~",paste(c(subvars,"tmean2"),collapse=" + ")) |> as.formula()
-}else{
-  form<-paste("y ~","dummy") |> as.formula()
+  form <- paste("y ~", paste(c(subvars, "tmean2"), collapse = " + ")) |> as.formula()
+} else {
+  form <- paste("y ~", "dummy") |> as.formula()
 }
 
 
 ## Run model
 m<-ewlgcp(
-  formula=form,
-  dmesh=dmesh,
-  effort = if(params$bias=="Bias"){TRUE}else{FALSE},
+  formula = form,
+  dmesh = dmesh,
+  effort = if(params$bias == "Bias") {TRUE} else {FALSE},
   adjust = FALSE,
   buffer = FALSE,
   orthogonal = TRUE,
   prior.beta = NULL,#prior.beta<-list(prec=list(default=1/(0.000000001)^2,Intercept=1/(20)^2),mean=list(default=0,Intercept=0)),
-  prior.range = c(5000,0.01),
-  prior.sigma = if(params$spatial == "Spatial"){c(1, 0.01)}else{c(0.00001, NA)},
+  prior.range = c(5000, 0.01),
+  prior.sigma = if(params$spatial == "Spatial") {c(1, 0.01)} else {c(0.00001, NA)},
   smooth = 2,
   num.threads=1:1,
   #blas.num.threads=2,

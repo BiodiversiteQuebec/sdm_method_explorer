@@ -2,11 +2,9 @@
 
 ### List of inputs for models
 
-source("scripts/sdm_utils.R")
+#source("scripts/sdm_utils.R")
 
 message(paste("Running: inputs","/",Sys.time(),"\n"))
-
-library(data.table)
 
 data <- c("gbif", "ebird", "atlas")[2]
 
@@ -14,26 +12,21 @@ group <- "birds"
 period <- c("breeding", "yearround", "nonbreeding", "prebreeding", "postbreeding")[1]
 target_group <- c("birds")
 
-epsg <- 32618 #32198 quebec lambert conforme #paste0("+units=km +init=epsg:",32198) #32198 # 32618 the original
+#epsg <- 6624 #32198 quebec lambert conforme #paste0("+units=km +init=epsg:",32198) #32198 # 32618 the original
 
-species<-c("Bonasa umbellus", "Catharus bicknelli", "Catharus fuscescens", 
-           "Catharus guttatus", "Catharus ustulatus", "Falcipennis canadensis", 
-           "Junco hyemalis", "Melospiza georgiana", "Melospiza lincolnii", 
-           "Melospiza melodia", "Poecile atricapillus", "Poecile hudsonicus", 
-           "Setophaga americana", "Setophaga caerulescens", "Setophaga castanea", 
-           "Setophaga cerulea", "Setophaga coronata", "Setophaga fusca", 
-           "Setophaga magnolia", "Setophaga palmarum", "Setophaga pensylvanica", 
-           "Setophaga petechia", "Setophaga pinus", "Setophaga ruticilla", 
-           "Setophaga striata", "Setophaga tigrina", "Setophaga virens")
+#species<-c("Bonasa umbellus", "Catharus bicknelli", "Catharus fuscescens", "Catharus guttatus", "Catharus ustulatus", "Falcipennis canadensis", "Junco hyemalis", "Melospiza georgiana", "Melospiza lincolnii", "Melospiza melodia", "Poecile atricapillus", "Poecile hudsonicus", "Setophaga americana", "Setophaga caerulescens", "Setophaga castanea", "Setophaga cerulea", "Setophaga coronata", "Setophaga fusca", "Setophaga magnolia", "Setophaga palmarum", "Setophaga pensylvanica", "Setophaga petechia", "Setophaga pinus", "Setophaga ruticilla", "Setophaga striata", "Setophaga tigrina", "Setophaga virens")
+
+
+#source(file.path("scripts/jobs", args))
 
 #sp<-species[10:length(species)]
 #sp<-c("Bonasa umbellus","Falcipennis canadensis","Setophaga americana", "Catharus fuscescens")
 #sp<-c("Melospiza melodia")
-sp <- species[25]#[1]#[1:20]
+sp <- species#[1]#[1:20]
 #sp<-c("Catharus bicknelli")
 #sp <- species#[11]
 
-rerun <- FALSE
+rerun <- TRUE
 
 years <- list( # year wanted or a vector of years, has to be a range for gbif data
   1950:2024

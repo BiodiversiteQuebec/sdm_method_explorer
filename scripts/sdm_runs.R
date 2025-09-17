@@ -1,9 +1,4 @@
 
-
-# scp "C:/Users/rouf1703/Documents/BiodiversitéQuébec/sdm_explorer/sdm_*" frousseu@vmbq:/home/frousseu
-
-# scp -p frousseu@sdm:'/home/frousseu/sdm_*' C:/Users/rouf1703/Documents/BiodiversitéQuébec/sdm_explorer 
-
 # rsync -avzu --dry-run --info=progress2 --exclude '.*' --exclude='data/*' --exclude='outputs/*' --exclude='json/*' -e ssh /home/frousseu/Documents/github/sdm_method_explorer/ frousseu@sdm:/home/frousseu/data/sdm_method_explorer/
 
 # rsync -avzu --dry-run --info=progress2 --exclude '.*' --exclude='data/*' --exclude='outputs/*' --exclude='json/*' -e ssh /home/frousseu/Documents/github/sdm_method_explorer/scripts/*.R frousseu@sdm:/home/frousseu/data/sdm_method_explorer/scripts/
@@ -18,10 +13,21 @@ library(future)
 library(future.apply)
 library(data.table)
 library(jsonlite)
-#library(future.callr) # not really working for some reason
+library(terra)
+library(sf)
+library(geodata)
+library(rmapshaper)
+library(concaveman)
+library(INLA)
+library(rnaturalearth)
+library(ewlgcpSDM)
+library(dplyr)
 
-### Run scripts
-#save.image(file.path(path_write,"sdm.RData"))
+i <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID"))
+#i <- 1
+
+args <- commandArgs(trailingOnly=TRUE)
+#args <- "ebv_birds.R"
 
 source("scripts/sdm_utils.R")
 
@@ -44,66 +50,70 @@ github_user <- "frousseu"
 github_token_path <- "/home/frousseu/.ssh/github_token"
 repo <- "BiodiversiteQuebec/sdm_method_explorer"
 
+job <- gsub("\\.R|\\.r", "", args)
+source(file.path("scripts/jobs", args))
+#source("scripts/sdm_inputs.R")
+#runs <- 1:nrow(results)
 
-source("scripts/sdm_inputs.R")
-runs <- 1:nrow(results)
+#sp <- species
 
-reposnapshot <- get_repo_snapshot(repo, github_user, github_token_path)
+reposnapshot <- "testcommit"#get_repo_snapshot(repo, github_user, github_token_path)
 results$reposnapshot <- reposnapshot
 
 source("scripts/sdm_prelim.R")
 source("scripts/sdm_predictors.R")
 
-nworkers<-min(c(length(runs), 3))
+#nworkers<-min(c(length(runs), 3))
 #options(mc.cores=nworkers)
-options(future.globals.maxSize = 5000 * 1024 ^ 2)
-plan(multisession, workers = nworkers)
-future_lapply(runs,function(i){
+#options(future.globals.maxSize = 5000 * 1024 ^ 2)
+#plan(multisession, workers = nworkers)
+#future_lapply(runs,function(i){
+#lapply(runs,function(i){
 #foreach(i=runs) %dopar% {
   
-  t1 <- Sys.time()
-  
-  source("scripts/sdm_utils.R", local = TRUE)
+t1 <- Sys.time()
 
-  params <- lapply(as.list(results),"[",i)
-  
-  source("scripts/sdm_data.R",local=TRUE)
-  
-  if(nrow(obs) < 5){
-    checkpoint("Aborting:")
-    cat("\nToo few observations, returning NULL")
-    return(NULL)
-  }
-  
-  source("scripts/sdm_background.R",local=TRUE)
-  
-  switch(params$algorithm,
-         maxent={
-           source("scripts/sdm_maxent_predicts.R",local=TRUE)
-         },
-         randomForest={
-           source("scripts/sdm_randomforest.R",local=TRUE)
-         },
-         brt={
-           source("scripts/sdm_brt.R",local=TRUE)
-         },
-         ewlgcpSDM={
-           source("scripts/sdm_ewlgcpSDM.R",local=TRUE)
-         }
-         
-          
-              
-  )
-  
-  t2 <- Sys.time() 
-  message(paste("Minutes:", round(as.numeric(difftime(t2, t1, units = "mins")), 2), "\n"))
-  
-},future.conditions="message", future.globals = ls(), future.packages = names(sessionInfo()$otherPkgs))
+#source("scripts/sdm_utils.R")
 
-plan(sequential)
+params <- lapply(as.list(results),"[", i)
+
+sp <- params$species
+genus <- strsplit(sp, " ")[[1]][1]
+
+source(file.path("scripts/groups", paste0("sdm_", group, ".R")))
+source("scripts/sdm_data.R")
+
+if(nrow(obs) < 5){
+  checkpoint("Aborting:")
+  cat("\nToo few observations, returning NULL")
+  return(NULL)
+}
+
+#source("scripts/sdm_background.R")
+
+switch(params$algorithm,
+        maxent={
+          source("scripts/sdm_maxent_predicts.R")
+        },
+        randomForest={
+          source("scripts/sdm_randomforest.R")
+        },
+        brt={
+          source("scripts/sdm_brt.R")
+        },
+        ewlgcpSDM={
+          source("scripts/sdm_ewlgcpSDM.R")
+        }
+        
+)
+
+t2 <- Sys.time() 
+message(paste("Minutes:", round(as.numeric(difftime(t2, t1, units = "mins")), 2), "\n"))
+  
+#},future.conditions="message", future.globals = ls(), future.packages = names(sessionInfo()$otherPkgs))
+#plan(sequential)
 
 add_results()
-
 clean_results()
 
 

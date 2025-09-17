@@ -1,45 +1,42 @@
 
 cat(paste("Running: prelim","/",Sys.time(),"\n"))
 
-library(rgbif)
-library(terra)
-library(sf)
-library(geodata)
-library(rmapshaper)
-library(INLA)
-library(rnaturalearth)
-library(ewlgcpSDM)
+epsg <- 6624
 
 # Downloads polygons using package geodata
-can<-gadm("CAN",level=1,path="data") |> st_as_sf()
-usa<-gadm("USA",level=1,path="data") |> st_as_sf()
-na<-rbind(can,usa)
-na<-st_transform(na,32618)
+#can<-gadm("CAN",level=1,path="data") |> st_as_sf()
+#usa<-gadm("USA",level=1,path="data") |> st_as_sf()
+can <- readRDS("data/gadm/gadm41_CAN_1_pk.rds") |> st_as_sf()
+usa <- readRDS("data/gadm/gadm41_USA_1_pk.rds") |> st_as_sf()
+na <- rbind(can, usa)
+na <- st_transform(na, epsg)
 
 # keep Québec and bordering provinces/states as a buffer
-region<-na[na$NAME_1%in%c("Québec","New Brunswick","Maine","Vermont","New Hampshire","New York","Ontario","Nova Scotia","Prince Edward Island","Massachusetts","Connecticut","Rhode Island"),]
+region <- na[na$NAME_1%in%c("Québec", "New Brunswick", "Maine", "Vermont", "New Hampshire", "New York", "Ontario", "Nova Scotia", "Prince Edward Island", "Massachusetts", "Connecticut", "Rhode Island"),]
 #region<-na[na$NAME_1%in%c("Québec","Manitoba","Nunavut","New Brunswick","Maine","Vermont","New Hampshire","New York","Ontario","Nova Scotia","Prince Edward Island","Massachusetts","Connecticut","Rhode Island"),]
 
 # split NF into different polygons
-labrador<-ms_explode(na[na$NAME_1%in%c("Newfoundland and Labrador"),]) 
-labrador<-labrador[which.max(st_area(labrador)),] # keep Labarador
-region<-rbind(region,labrador)
-qc<-ms_simplify(region,0.01)
+labrador <- ms_explode(na[na$NAME_1%in%c("Newfoundland and Labrador"),]) 
+labrador <- labrador[which.max(st_area(labrador)), ] # keep Labarador
+region <- rbind(region, labrador)
+qc <- na[na$NAME_1 %in% c("Québec"), ]
+qc <- ms_simplify(qc, 0.01)
 
 # Add it to the study region
-region<-rbind(region,labrador) 
+#region <- rbind(region, labrador) 
 
 # Simplify polygons to make things faster
-region<-ms_simplify(region,0.005)
-region<-st_union(region) |> st_as_sf()
+region <- ms_simplify(region, 0.01)
+region <- st_union(region) |> st_as_sf()
 
 # lakes
-lakes<-ne_download(scale="medium",type="lakes",destdir="data",category="physical",returnclass="sf") |> st_transform(32618)
-lakes<-st_filter(lakes,region)
+#lakes<-ne_download(scale="medium",type="lakes",destdir="data",category="physical",returnclass="sf") |> st_transform(epsg) |> st_write("data/ne_50m_lakes.gpkg")
+lakes <- st_read("data/ne_50m_lakes.gpkg")
+lakes <- st_filter(lakes, region)
 
-if(data=="ebird"){
-  checklists<-fread("data/ebird_sampling_events.csv")
-}
+#if(data=="ebird"){
+  #checklists<-fread("data/ebird_sampling_events.csv")
+#}
 
 
 

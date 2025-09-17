@@ -10,8 +10,8 @@ library(predicts)
 
 
 m <- MaxEnt(unwrap(predictors)[[vars]], 
-             vect(d[d$presence==1,]),vect(d[d$presence==0,]),
-             removeDuplicates=TRUE,
+             vect(d[d$presence==1,]), vect(d[d$presence==0,]),
+             removeDuplicates=FALSE,
              silent=FALSE,
              #args=c("replicatetype=bootstrap","replicates=1","threads=4")
              #args=c("linear","quadratic","product","hinge","nothreshold","replicatetype=bootstrap","replicates=1","threads=4")
@@ -24,14 +24,14 @@ m <- MaxEnt(unwrap(predictors)[[vars]],
 
 #plot(p[,1],p[,2],type="l")
 
-preds <- mask(predict(m, unwrap(predictors)[[vars]],args=c("outputformat=raw","replicatetype=bootstrap")),vect(region))
+preds <- mask(predict(m, unwrap(predictors)[[vars]], args = c("outputformat=raw","replicatetype=bootstrap")), region)
 
 #plot(preds)
 #plot_preds(F)
 
 write_preds(preds)
 
-auc<-unname(m@results[row.names(m@results)=="Training.AUC",1])
+auc<-unname(m@results[row.names(m@results)=="Training.AUC", 1])
 I<-niche_overlap()
 
 write_results()
