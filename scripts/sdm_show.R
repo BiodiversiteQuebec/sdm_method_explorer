@@ -13,17 +13,17 @@ cols<-c("#CCCCCC","#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743
 cols<-coloScale(1:200,cols)
 
 
-lf<-list.files("outputs", full = TRUE, pattern = "1950-2024") |> grep("catha", x = _, value = TRUE)
+lf<-list.files("outputs/rasters", full = TRUE, pattern = "1950-2024") |> grep("carpinus_", x = _, value = TRUE)
 png("sdms.png",width=16,height=10,res=400,units="in")
 par(mfrow=n2mfrow(length(lf),asp=3/2))
 r<-lapply(lf,function(i){
   r<-rast(i)
   titre<-basename(i)
   titre<-gsub(".tif","",titre)
-  titre<-sapply(strsplit(titre,"_"),function(i){paste(c(paste(i[1:2], collapse = " "), i[3:7]), collapse="\n")})
+  titre<-sapply(strsplit(titre,"_"),function(i){paste(c(sub("^([a-z])", "\\U\\1", paste(i[2:3], collapse = " "), perl = TRUE), i[1], i[4:7]), collapse="\n")})
   titre <- gsub("(^[[:alpha:]])", "\\U\\1", titre, perl=TRUE)
-  plot(r,mar=c(0,0.5,0.5,0),legend=TRUE,axes=FALSE,plg=list(size=c(0.4, 1.1)))
-  text(par("usr")[1],par("usr")[4],label=titre,adj=c(0,1),cex=0.85,xpd=TRUE)
+  plot(r,mar = c(0, 0.5, 0.5, 0), legend = TRUE, axes = FALSE, plg = list(size =c(0.4, 1.1)))
+  text(par("usr")[1], par("usr")[4], label = titre, adj = c(0, 1), cex = 1, xpd = TRUE)
 })
 par(mfrow=c(1,1))
 dev.off()

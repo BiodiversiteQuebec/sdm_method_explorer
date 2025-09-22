@@ -22,12 +22,13 @@ library(INLA)
 library(rnaturalearth)
 library(ewlgcpSDM)
 library(dplyr)
+library(sdmtools)
 
 i <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID"))
 #i <- 1
 
 args <- commandArgs(trailingOnly=TRUE)
-#args <- "ebv_birds.R"
+#args <- "ebv_pffq.R"
 
 source("scripts/sdm_utils.R")
 
@@ -103,9 +104,10 @@ switch(params$algorithm,
         },
         ewlgcpSDM={
           source("scripts/sdm_ewlgcpSDM.R")
-        }
-        
+        }        
 )
+
+source("scripts/sdm_graphics.R")
 
 t2 <- Sys.time() 
 message(paste("Minutes:", round(as.numeric(difftime(t2, t1, units = "mins")), 2), "\n"))

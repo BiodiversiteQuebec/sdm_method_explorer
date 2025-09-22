@@ -1,4 +1,11 @@
 
+
+# wget https://diffusion.mffp.gouv.qc.ca/Diffusion/DonneeGratuite/Foret/DONNEES_FOR_ECO_PROV/Aires_de_repartition_des_especes_PFFQ/02-Donnees/PROV/AIRES_REPARTITION_PFFQ.gpkg.zip
+
+# ogr2ogr -f GPKG aires_repartition_pffq.gpkg -nln aires_repartition_pffq -nlt CONVERT_TO_LINEAR -nlt PROMOTE_TO_MULTI AIRES_REPARTITION_PFFQ.gpkg aires_repartition_pffq
+
+#
+
 message(paste("Running: inputs","/",Sys.time(),"\n"))
 
 ################################################################################
@@ -16,7 +23,7 @@ vars_pool<-c("conifers", "taiga", "deciduous", "mixed", "temperate_shrubland",
 "polar_barren", "wetland", "cropland", "barren", "urban", "water", 
 "snow", "distfsl", "tmean", "prec", "geomflat", "elevation", 
 "distroads", "sand")
-vars_pool <- vars_pool[c(1, 4, 17)]
+#vars_pool <- vars_pool[c(1, 4, 17)]
 
 rerun <- TRUE
 
@@ -61,10 +68,14 @@ species_vars <- list(
 )
 
 set.seed(1234)
+aires <- st_read("data/aires_repartition_pffq.gpkg") |>
+  mutate(species = sub("^(([^ ]+ )[^ ]+).*", "\\1", NOM_SCI))
+species <- unique(aires$species)
 #species <- sample(species_info$species[species_info$group %in% "birds"], 300)
 #species <- sample(species_info$species[species_info$group %in% "trees"], 2)
 #species <- c("Turdus migratorius", "Poecile atricapillus")
-species <- c("Picea mariana", "Acer rubrum") #
+#species <- c("Picea mariana", "Acer rubrum") #
+#species <- species[1:10]#
 #species <- NULL # leave NULL if all species should be used
 print(species)
 
@@ -77,65 +88,21 @@ ebird <- duckdbfs::open_dataset("data/ebd_relJan-2025.parquet")
 
 species_info <- atlas |>
   filter(kingdom %in% c("Plantae")) |>
-  mutate(group = tolower(group_en)) |>
+  mutate(taxon = tolower(group_en)) |>
+  mutate(start = "01-01") |>
+  mutate(end = "12-31") |>
+  mutate(group = group) |>
   rename(species = valid_scientific_name) |>
-  count(group, species) |>
+  count(group, taxon, species) |>
   arrange(-n) |> 
   collect() |>
   mutate(species = sub("^(([^ ]+ )[^ ]+).*", "\\1", species)) |>
   group_by(across(-n)) |>
   summarise(n = sum(n), .groups = "drop") |>
   arrange(-n) |> 
-  as.data.frame()
+  as.data.frame()         
 
-atlas |>
-  count(kingdom) |>
-  arrange(-n) |>
-  collect()
-
-
-atlas |>
-  count(group_en %in% c("")) |>
-  arrange(-n) |>
-  collect()
-
-
-species_info <- atlas |>
-  filter(observed_rank %in% c("species", "subspecies", "variety", "form")) |>
-  mutate(group = tolower(group_en)) |>
-  filter(group %in% c("plants")) |>
-  rename(species = valid_scientific_name) |>
-  count(group, order, genus, species) |>
-  arrange(-n) |> 
-  collect() |>
-  mutate(species = sub("^(([^ ]+ )[^ ]+).*", "\\1", species)) |>
-  group_by(across(-n)) |>
-  summarise(n = sum(n), .groups = "drop") |>
-  arrange(-n) |> 
-  as.data.frame()
-
-eb <- ebirdst_runs |>
-         mutate(start = ifelse(is.na(breeding_start), "01-01", substr(breeding_start, 6, 10))) |>
-         mutate(end = ifelse(is.na(breeding_end), "12-31", substr(breeding_end, 6, 10))) |>
-         rename(species = scientific_name) |>
-         mutate(species = case_match(species, 
-          "Botaurus exilis" ~ "Ixobrychus exilis", 
-          "Acanthis flammea" ~ "Acanthis hornemanni",
-          "Astur atricapillus" ~ "Accipiter atricapillus",
-          "Astur cooperii" ~ "Accipiter cooperii",
-          "Ardea ibis" ~ "Bubulcus ibis",
-          "Botaurus exilis" ~ "Ixobrychus exilis",
-          "Larus smithsonianus" ~ "Larus argentatus",
-          "Nannopterum auritum" ~ "Phalacrocorax auritus",
-          "Corthylio calendula" ~ "Regulus calendula",
-          "Troglodytes aedon/musculus" ~ "Troglodytes aedon",
-          .default = species)) |>
-         dplyr::select(species, start, end) |>
-         unique() |>
-         as.data.frame()
-
-species_info <- merge(species_info, eb, all.x = TRUE)
-species_info <- species_info[species_info$n >= 500, ]
+species_info <- species_info[species_info$n >= 10, ]
 species_info <- species_info[rev(order(species_info$n)), ]
 
 
@@ -210,7 +177,7 @@ results <- expand.grid(job = job,
                        stringsAsFactors = FALSE)
 
 results$period <- period
-results$period_dates <- periodparams[match(results$species, species)]
+results$period_dates <- periodparams#[match(results$species, species)]
 o <- c("job", "group", "species", "years", "period", "period_dates", "target_group", "algorithm", "bias", "usepredictors", "spatial")
 results <- results[ , o]
 
@@ -261,6 +228,7 @@ results <- merge(results, species_info)
 #  old <- fromJSON("results.json")
 #  res <- rbindlist(list(results, old), fill = TRUE)
 #}
+
 
 
 
