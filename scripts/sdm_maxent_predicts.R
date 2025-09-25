@@ -15,7 +15,7 @@ m <- MaxEnt(unwrap(predictors)[[vars]],
              silent=FALSE,
              #args=c("replicatetype=bootstrap","replicates=1","threads=4")
              #args=c("linear","quadratic","product","hinge","nothreshold","replicatetype=bootstrap","replicates=1","threads=4")
-             args=c("linear","quadratic","hinge","replicatetype=bootstrap","replicates=1","threads=4")
+             args=c("linear", "quadratic", "noproduct", "hinge", "nothreshold", "replicatetype=bootstrap", "replicates=1", "threads=4")
      )
 
 #newdat<-predictors[[vars]] |> as.data.frame() |> colMeans(na.rm=TRUE) |> as.list() |> data.frame() 

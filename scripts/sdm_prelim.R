@@ -12,21 +12,22 @@ na <- rbind(can, usa)
 na <- st_transform(na, epsg)
 
 # keep Québec and bordering provinces/states as a buffer
-region <- na[na$NAME_1%in%c("Québec", "New Brunswick", "Maine", "Vermont", "New Hampshire", "New York", "Ontario", "Nova Scotia", "Prince Edward Island", "Massachusetts", "Connecticut", "Rhode Island"),]
+#region <- na[na$NAME_1%in%c("Québec", "New Brunswick", "Maine", "Vermont", "New Hampshire", "New York", "Ontario", "Nova Scotia", "Prince Edward Island", "Massachusetts", "Connecticut", "Rhode Island"),]
+region <- na[na$NAME_1 %in% c("Québec"), ]
 #region<-na[na$NAME_1%in%c("Québec","Manitoba","Nunavut","New Brunswick","Maine","Vermont","New Hampshire","New York","Ontario","Nova Scotia","Prince Edward Island","Massachusetts","Connecticut","Rhode Island"),]
 
 # split NF into different polygons
 labrador <- ms_explode(na[na$NAME_1%in%c("Newfoundland and Labrador"),]) 
 labrador <- labrador[which.max(st_area(labrador)), ] # keep Labarador
-region <- rbind(region, labrador)
+#region <- rbind(region, labrador)
 qc <- na[na$NAME_1 %in% c("Québec"), ]
-qc <- ms_simplify(qc, 0.01)
+qc <- ms_simplify(qc, 0.05)
 
 # Add it to the study region
 #region <- rbind(region, labrador) 
 
 # Simplify polygons to make things faster
-region <- ms_simplify(region, 0.01)
+region <- ms_simplify(region, 0.05)
 region <- st_union(region) |> st_as_sf()
 
 # lakes

@@ -1,18 +1,18 @@
 #!/bin/bash
-#SBATCH --array=1-894%50
+#SBATCH --array=1-860%100
 #SBATCH --account=rpp-gonzalez
-#SBATCH --time=02:00:00
+#SBATCH --time=02:30:00
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=200G
-#SBATCH --job-name=ebv_birds_test
+#SBATCH --job-name=ebv_pffq_plants_test
 ##SBATCH --mail-user=francois.rousseu@usherbrooke.ca
 ##SBATCH --mail-type=ALL
 
 echo $SLURM_ARRAY_TASK_ID
-module load StdEnv/2023 gdal/3.9.1 udunits/2.2.28 r/4.5.0 
+module load StdEnv/2023 gcc/12.3 r/4.5.0 geos/3.12.0 gdal/3.9.1 udunits/2.2.28 gsl/2.7 jags/4.3.2
 export JAVA_TOOL_OPTIONS="-Xmx200g" # for Maxent
 #export NODE_OPTIONS="--max-old-space-size=102400" # for concaveman V8 engine
-Rscript scripts/sdm_runs.R ebv_pffq.R
+Rscript scripts/sdm_runs.R ebv_pffq_plants.R
 
 # ls results/graphics | grep -E "Pseudacris_triseriata|Hemidactylium_scutatum|Gyrinophilus_porphyriticus|Desmognathus_ochrophaeus|Emydoidea_blandingii|Glyptemys_insculpta|Nerodia_sipedon|Lampropeltis_triangulum|Aquila_chrysaetos|Catharus_bicknelli|Setophaga_cerulea|Coturnicops_noveboracensis|Ixobrychus_exilis|Glaucomys_volans"
 

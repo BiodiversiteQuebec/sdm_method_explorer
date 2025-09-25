@@ -4,7 +4,7 @@ checkpoint("Running:")
 library(dismo)
 library(lightgbm)
 
-dat$presence<-as.integer(as.character(dat$presence))
+dat$presence <- as.integer(as.character(dat$presence))
 
 X <- data.matrix(dat[ , -match(c("presence"), names(dat))])
 Y <- dat$presence

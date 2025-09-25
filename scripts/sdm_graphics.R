@@ -29,9 +29,10 @@ add_range <- function(){
    if(exists("aires")){
      w <- which(aires$species == sp)
      if(any(w)){
-       plot(st_geometry(aires[w, ]), col = adjustcolor("black", 0.10), border = NA, add = TRUE) 
+       plot(st_geometry(aires[w, ]), border = adjustcolor("black", 0.25), lwd = 0.75, col = NA, add = TRUE) 
      }
    }   
+   plot(st_geometry(ran), col = adjustcolor("black", 0.10), border = NA, add = TRUE)
 }
 
 

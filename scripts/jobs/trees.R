@@ -8,7 +8,7 @@ vascan <- read.csv("data/vascan.txt", sep = "\t")
 vascan <- vascan[vascan$Rank == "Species", ]
 plants <- vascan$Scientific.name[!grepl("Tree", vascan$Habit)]
 
-atlas <- duckdbfs::open_dataset("data/atlas_2025-03-17.parquet", tblname = "atlas")
+atlas <- duckdbfs::open_dataset("data/atlas_2025-09-11.parquet", tblname = "atlas")
 gbif <- duckdbfs::open_dataset("data/gbif_2025-03-01.parquet")
 #ebird <- duckdbfs::open_dataset("/home/frousseu/data2/ebd_relJan-2025.parquet")
 ebird <- duckdbfs::open_dataset("data/ebd_relJan-2025.parquet")

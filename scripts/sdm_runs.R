@@ -25,10 +25,10 @@ library(dplyr)
 library(sdmtools)
 
 i <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID"))
-#i <- 1
+i <- 1
 
 args <- commandArgs(trailingOnly=TRUE)
-#args <- "ebv_pffq.R"
+args <- "ebv_pffq_plants.R"
 
 source("scripts/sdm_utils.R")
 
@@ -53,8 +53,7 @@ repo <- "BiodiversiteQuebec/sdm_method_explorer"
 
 job <- gsub("\\.R|\\.r", "", args)
 source(file.path("scripts/jobs", args))
-#source("scripts/sdm_inputs.R")
-#runs <- 1:nrow(results)
+sprintf("Species: %s", results$species[i])
 
 #sp <- species
 
@@ -107,6 +106,7 @@ switch(params$algorithm,
         }        
 )
 
+source("scripts/sdm_binarize.R")
 source("scripts/sdm_graphics.R")
 
 t2 <- Sys.time() 
@@ -115,8 +115,8 @@ message(paste("Minutes:", round(as.numeric(difftime(t2, t1, units = "mins")), 2)
 #},future.conditions="message", future.globals = ls(), future.packages = names(sessionInfo()$otherPkgs))
 #plan(sequential)
 
-add_results()
-clean_results()
+#add_results()
+#clean_results()
 
 
 

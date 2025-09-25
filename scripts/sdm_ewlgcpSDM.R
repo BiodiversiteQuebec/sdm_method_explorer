@@ -6,13 +6,52 @@ checkpoint("Running:")
 
 library(ewlgcpSDM)
 
+
+###########################################
+### Build mesh for ewlgcpSDM ##############
+
+if(any(params$algorithm == "ewlgcpSDM")){
+
+    cat(paste("Running: dmesh","/",Sys.time(),"\n"))
+
+    ### Build mesh
+    domain <- st_sample(st_buffer(region, 5000), 5000)
+    domain <- inla.nonconvex.hull(st_coordinates(domain), convex = -0.015, resolution = 75)
+
+    edge <- min(c(diff(st_bbox(region)[c(1, 3)]) * dmesh_resolution, diff(st_bbox(region)[c(2, 4)]) * dmesh_resolution))
+    edge
+
+    mesh <- inla.mesh.2d(loc.domain = NULL,
+                        max.edge = c(edge, edge * 3),
+                        min.angle = 21,
+                        cutoff = edge / 1,
+                        offset = c(edge, edge * 3),
+                        boundary = domain,#inla.mesh.segment(domainloc),
+                        crs = st_crs(region))
+
+    #plan(multisession, workers = 15)
+    dmesh <- dmesh_mesh(mesh)
+    #plan(sequential)
+
+    ### Compute weights
+    dmesh <- dmesh_weights(dmesh, region)
+
+    ### Summarize predictors
+    #plan(multisession, workers = 6)
+    dmesh <- dmesh_predictors(dmesh, predictors, progress = FALSE)
+    #plan(sequential)
+
+}
+
+
 ### Summarize observations and effort
-buff <- st_buffer(obs, 500000) |> st_union()
+buff <- st_buffer(obs, effort_buffer_radius) |> st_union()
 dmesh <- dmesh_effort(dmesh, obs = d[d$presence == 1, ], background =d[d$presence %in% c(0, 1), ], buffer = buff, adjust = FALSE)
 
 if(params$usepredictors=="Predictors"){
   subvars <- c("conifers", "taiga", "deciduous", 
 "temperate_grassland", "wetland", "cropland", "urban", "water", "distfsl", "tmean", "geomflat", "elevation", "sand")
+  subvars <- vars_pool
   form <- paste("y ~", paste(c(subvars, "tmean2"), collapse = " + ")) |> as.formula()
 } else {
   form <- paste("y ~", "dummy") |> as.formula()
@@ -31,38 +70,40 @@ m<-ewlgcp(
   prior.range = c(5000, 0.01),
   prior.sigma = if(params$spatial == "Spatial") {c(1, 0.01)} else {c(0.00001, NA)},
   smooth = 2,
-  num.threads=1:1,
+  num.threads = 1:1,
   #blas.num.threads=2,
-  control.inla=list(
-    strategy="adaptive", # "adaptive"
-    int.strategy="eb", # "eb"
-    huge=FALSE, # apparently ignored
-    control.vb=list(
-      enable=TRUE,
-      verbose=TRUE
+  control.inla = list(
+    strategy = "adaptive", # "adaptive"
+    int.strategy = "eb", # "eb"
+    huge = FALSE, # apparently ignored
+    control.vb = list(
+      enable = TRUE,
+      verbose = TRUE
     )
   ),# adaptive, eb
-  inla.mode="experimental",
-  control.compute=list(config=TRUE,openmp.strategy="pardiso"),
-  verbose=FALSE,
-  safe=FALSE
+  inla.mode = "experimental",
+  control.compute = list(config = TRUE, openmp.strategy = "pardiso"),
+  verbose = TRUE,
+  safe = FALSE
 )
 
 
 ## Map results
 
-sdm<-ewlgcpSDM::map(model = m,
-                    dmesh = dmesh,
-                    dims = c(1000,1000),
-                    region= region
+sdm <- ewlgcpSDM::map(model = m,
+        dmesh = dmesh,
+        #dims = c(1000, 1000),
+        region = region,
+        mask = TRUE
 )
 
 #preds<-exp(sdm$linkmean-sdm$spacemean)
 #preds<-exp(sdm$linkmean)
 #preds<-exp(sdm$"link0.5quant")
 #preds<-sdm[[c("0.025quant","mean","0.975quant")]]
-preds<-sdm[[c("mean")]]
+preds <- sdm[[c("mean")]]
 #preds <- mask(preds, vect(region))
+#preds <- crop(preds, vect(region), mask = TRUE)
 #plot(preds)
 
 #plot_preds()

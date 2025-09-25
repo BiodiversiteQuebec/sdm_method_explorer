@@ -18,11 +18,11 @@ group <- "plants"
 period <- c("breeding", "yearround", "nonbreeding", "prebreeding", "postbreeding")[2]
 target_group <- c("plants")
 
+#vars_pool<-c("conifers", "taiga", "deciduous", "mixed", "temperate_shrubland", "temperate_grassland", "polar_shrubland", "polar_grassland", "polar_barren", "wetland", "cropland", "barren", "urban", "water", "snow", "distfsl", "tmean", "prec", "geomflat", "elevation", "distroads", "sand")
 vars_pool<-c("conifers", "taiga", "deciduous", "mixed", "temperate_shrubland", 
 "temperate_grassland", "polar_shrubland", "polar_grassland", 
 "polar_barren", "wetland", "cropland", "barren", "urban", "water", 
-"snow", "distfsl", "tmean", "prec", "geomflat", "elevation", 
-"distroads", "sand")
+"snow", "distfsl", "tmean", "prec", "geomflat", "elevation", "sand")
 #vars_pool <- vars_pool[c(1, 4, 17)]
 
 rerun <- TRUE
@@ -38,7 +38,7 @@ th_small <- th # for local scale model if any
 
 ### Modeling ##################################################################
 
-algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(2:4)]
+algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1, 2, 3, 4)]
 bias<-c("Bias","noBias")[1]
 usepredictors<-c("Predictors","noPredictors")[1]
 spatial<-c("Spatial","noSpatial")[2]
@@ -54,7 +54,7 @@ add_effort_buffer <- TRUE # add an effort buffer or not
 effort_buffer_radius <- 500000 # in meters
 effort_buffer_n <- 5000 # number of observations in the outside buffer
 
-dmesh_resolution <- 0.01
+dmesh_resolution <- 0.002
 
 ### Variables ###################################################################
 
@@ -69,12 +69,22 @@ species_vars <- list(
 
 set.seed(1234)
 aires <- st_read("data/aires_repartition_pffq.gpkg") |>
-  mutate(species = sub("^(([^ ]+ )[^ ]+).*", "\\1", NOM_SCI))
+  mutate(species = sub("^(([^ ]+ )[^ ]+).*", "\\1", NOM_SCI)) |>
+  mutate(species = case_match(species, 
+    "Lonicera villosa" ~ "Lonicera caerulea", 
+    .default = species))
 species <- unique(aires$species)
+
+vascan <- read.csv("data/vascan.txt", sep = "\t")
+vascan <- vascan[vascan$Rank == "Species", ]
+plants <- vascan$Scientific.name[!grepl("Tree", vascan$Habit)]
+
+species <- species[species %in% plants] # Just keep what is not a tree in VASCAN
+
 #species <- sample(species_info$species[species_info$group %in% "birds"], 300)
 #species <- sample(species_info$species[species_info$group %in% "trees"], 2)
-#species <- c("Turdus migratorius", "Poecile atricapillus")
-#species <- c("Picea mariana", "Acer rubrum") #
+#species <- c("Aralia hispida", "Solidago rugosa")
+#species <- c("Picea mariana", "Clintonia borealis") #
 #species <- species[1:10]#
 #species <- NULL # leave NULL if all species should be used
 print(species)
@@ -82,9 +92,32 @@ print(species)
 ############################################################################################
 ############################################################################################
 
-atlas <- duckdbfs::open_dataset("data/atlas_2025-03-17.parquet", tblname = "atlas")
+#atlas |> 
+#  filter(kingdom == "Plantae") |> 
+#  rename(species = valid_scientific_name) |> 
+#  count(dataset_name, species) |>
+#  arrange(-n) |>
+#  collect() |>
+#  as.data.frame()
+  
+#atlas |> 
+#  filter(kingdom == "Plantae") |> 
+#  rename(species = valid_scientific_name) |> 
+#  count(dataset_name) |>
+#  arrange(-n) |>
+#  collect() |>
+#  #(\(x) x[grepl("Placettes-échantillons", x$dataset_name), ])() |>
+#  #group_by(species) |>
+#  #summarise(n = sum(n), .groups = "drop") |>
+#  #arrange(-n) |>
+#  as.data.frame() |>
+#  head(100)
+
+
+atlas <- duckdbfs::open_dataset("data/atlas_2025-09-11.parquet", tblname = "atlas")
 gbif <- duckdbfs::open_dataset("data/gbif_2025-03-01.parquet")
 ebird <- duckdbfs::open_dataset("data/ebd_relJan-2025.parquet")
+
 
 species_info <- atlas |>
   filter(kingdom %in% c("Plantae")) |>
@@ -102,7 +135,10 @@ species_info <- atlas |>
   arrange(-n) |> 
   as.data.frame()         
 
-species_info <- species_info[species_info$n >= 10, ]
+
+species_info <- species_info[species_info$species %in% species, ]
+
+species_info <- species_info[species_info$n >= 5, ]
 species_info <- species_info[rev(order(species_info$n)), ]
 
 
@@ -129,8 +165,6 @@ species_info$vars <- lapply(species_info$vars, function(i){
   }
 })
 
-
-species_info <- species_info[species_info$species %in% species, ]
 
 breeding_periods <- lapply(1:nrow(species_info), function(i){
   c(species_info$start[i], species_info$end[i])

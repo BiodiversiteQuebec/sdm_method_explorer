@@ -1,7 +1,12 @@
 
-message(paste("Running: inputs","/",Sys.time(),"\n"))
 
-library(ebirdst)
+# wget https://diffusion.mffp.gouv.qc.ca/Diffusion/DonneeGratuite/Foret/DONNEES_FOR_ECO_PROV/Aires_de_repartition_des_especes_PFFQ/02-Donnees/PROV/AIRES_REPARTITION_PFFQ.gpkg.zip
+
+# ogr2ogr -f GPKG aires_repartition_pffq.gpkg -nln aires_repartition_pffq -nlt CONVERT_TO_LINEAR -nlt PROMOTE_TO_MULTI AIRES_REPARTITION_PFFQ.gpkg aires_repartition_pffq
+
+#
+
+message(paste("Running: inputs","/",Sys.time(),"\n"))
 
 ################################################################################
 ### Paramaters #################################################################
@@ -9,16 +14,16 @@ library(ebirdst)
 
 data <- c("gbif", "ebird", "atlas")[1:3]
 
-group <- "birds"
-period <- c("breeding", "yearround", "nonbreeding", "prebreeding", "postbreeding")[1]
-target_group <- c("birds")
+group <- "trees"
+period <- c("breeding", "yearround", "nonbreeding", "prebreeding", "postbreeding")[2]
+target_group <- c("trees")
 
+#vars_pool<-c("conifers", "taiga", "deciduous", "mixed", "temperate_shrubland", "temperate_grassland", "polar_shrubland", "polar_grassland", "polar_barren", "wetland", "cropland", "barren", "urban", "water", "snow", "distfsl", "tmean", "prec", "geomflat", "elevation", "distroads", "sand")
 vars_pool<-c("conifers", "taiga", "deciduous", "mixed", "temperate_shrubland", 
 "temperate_grassland", "polar_shrubland", "polar_grassland", 
 "polar_barren", "wetland", "cropland", "barren", "urban", "water", 
-"snow", "distfsl", "tmean", "prec", "geomflat", "elevation", 
-"distroads", "sand")
-vars_pool <- vars_pool[c(1, 4, 17)]
+"snow", "distfsl", "tmean", "prec", "geomflat", "elevation", "sand")
+#vars_pool <- vars_pool[c(1, 4, 17)]
 
 rerun <- TRUE
 
@@ -33,7 +38,7 @@ th_small <- th # for local scale model if any
 
 ### Modeling ##################################################################
 
-algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(2:4)]
+algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1, 2, 3, 4)]
 bias<-c("Bias","noBias")[1]
 usepredictors<-c("Predictors","noPredictors")[1]
 spatial<-c("Spatial","noSpatial")[2]
@@ -49,19 +54,11 @@ add_effort_buffer <- TRUE # add an effort buffer or not
 effort_buffer_radius <- 500000 # in meters
 effort_buffer_n <- 5000 # number of observations in the outside buffer
 
-dmesh_resolution <- 0.01
+dmesh_resolution <- 0.002
 
 ### Variables ###################################################################
 
 species_vars <- list(
-#`Pseudacris triseriata` = c("wetland", "marais", "marecage", "geomflat"), 
-#`Hemidactylium scutatum` = c("tourbiere", "marais", "organique"), 
-#`Gyrinophilus porphyriticus` = c("elevation", "ruggedness", "forest", "geomflat", "twi"), 
-#`Desmognathus ochrophaeus` = c("elevation", "ruggedness", "forest", "geomflat", "twi"), 
-#`Emydoidea blandingii` = c("wetland", "marais", "marecage", "geomflat", "water", "eau_peu_profonde"),
-#`Glyptemys insculpta` = c("wetland", "marais", "marecage", "geomflat", "water", "eau_peu_profonde", "sand"),
-#`Nerodia sipedon` = c("wetland", "marais", "marecage", "geomflat", "water", "eau_peu_profonde"),
-#`Lampropeltis triangulum` = c("wetland", "marais", "marecage", "geomflat", "water", "eau_peu_profonde"), 
 `Aquila chrysaetos` = c("elevation", "ruggedness"), 
 `Catharus bicknelli` = c("elevation", "ruggedness"), 
 `Setophaga cerulea` = c("forest", "ph", "silt", "nitrogen"), 
@@ -71,10 +68,24 @@ species_vars <- list(
 )
 
 set.seed(1234)
+aires <- st_read("data/aires_repartition_pffq.gpkg") |>
+  mutate(species = sub("^(([^ ]+ )[^ ]+).*", "\\1", NOM_SCI)) |>
+  mutate(species = case_match(species, 
+    "Lonicera villosa" ~ "Lonicera caerulea", 
+    .default = species))
+species <- unique(aires$species)
+
+vascan <- read.csv("data/vascan.txt", sep = "\t")
+vascan <- vascan[vascan$Rank == "Species", ]
+trees <- vascan$Scientific.name[grepl("Tree", vascan$Habit)]
+
+species <- species[species %in% trees] # Just keep what is not a tree in VASCAN
+
 #species <- sample(species_info$species[species_info$group %in% "birds"], 300)
 #species <- sample(species_info$species[species_info$group %in% "trees"], 2)
 #species <- c("Turdus migratorius", "Poecile atricapillus")
-species <- c("Catharus bicknelli", "Catharus ustulatus") #
+#species <- c("Picea mariana", "Clintonia borealis") #
+#species <- species[1:10]#
 #species <- NULL # leave NULL if all species should be used
 print(species)
 
@@ -85,42 +96,27 @@ atlas <- duckdbfs::open_dataset("data/atlas_2025-09-11.parquet", tblname = "atla
 gbif <- duckdbfs::open_dataset("data/gbif_2025-03-01.parquet")
 ebird <- duckdbfs::open_dataset("data/ebd_relJan-2025.parquet")
 
+
 species_info <- atlas |>
-  filter(observed_rank %in% c("species", "subspecies", "variety", "form")) |>
-  mutate(group = tolower(group_en)) |>
-  filter(group %in% c("birds")) |>
+  filter(kingdom %in% c("Plantae")) |>
+  mutate(taxon = tolower(group_en)) |>
+  mutate(start = "01-01") |>
+  mutate(end = "12-31") |>
+  mutate(group = group) |>
   rename(species = valid_scientific_name) |>
-  count(group, order, genus, species) |>
+  count(group, taxon, species) |>
   arrange(-n) |> 
   collect() |>
   mutate(species = sub("^(([^ ]+ )[^ ]+).*", "\\1", species)) |>
   group_by(across(-n)) |>
   summarise(n = sum(n), .groups = "drop") |>
   arrange(-n) |> 
-  as.data.frame()
+  as.data.frame()         
 
-eb <- ebirdst_runs |>
-         mutate(start = ifelse(is.na(breeding_start), "01-01", substr(breeding_start, 6, 10))) |>
-         mutate(end = ifelse(is.na(breeding_end), "12-31", substr(breeding_end, 6, 10))) |>
-         rename(species = scientific_name) |>
-         mutate(species = case_match(species, 
-          "Botaurus exilis" ~ "Ixobrychus exilis", 
-          "Acanthis flammea" ~ "Acanthis hornemanni",
-          "Astur atricapillus" ~ "Accipiter atricapillus",
-          "Astur cooperii" ~ "Accipiter cooperii",
-          "Ardea ibis" ~ "Bubulcus ibis",
-          "Botaurus exilis" ~ "Ixobrychus exilis",
-          "Larus smithsonianus" ~ "Larus argentatus",
-          "Nannopterum auritum" ~ "Phalacrocorax auritus",
-          "Corthylio calendula" ~ "Regulus calendula",
-          "Troglodytes aedon/musculus" ~ "Troglodytes aedon",
-          .default = species)) |>
-         dplyr::select(species, start, end) |>
-         unique() |>
-         as.data.frame()
 
-species_info <- merge(species_info, eb, all.x = TRUE)
-species_info <- species_info[species_info$n >= 500, ]
+species_info <- species_info[species_info$species %in% species, ]
+
+species_info <- species_info[species_info$n >= 5, ]
 species_info <- species_info[rev(order(species_info$n)), ]
 
 
@@ -147,8 +143,6 @@ species_info$vars <- lapply(species_info$vars, function(i){
   }
 })
 
-
-species_info <- species_info[species_info$species %in% species, ]
 
 breeding_periods <- lapply(1:nrow(species_info), function(i){
   c(species_info$start[i], species_info$end[i])
@@ -195,7 +189,7 @@ results <- expand.grid(job = job,
                        stringsAsFactors = FALSE)
 
 results$period <- period
-results$period_dates <- periodparams[match(results$species, species)]
+results$period_dates <- periodparams#[match(results$species, species)]
 o <- c("job", "group", "species", "years", "period", "period_dates", "target_group", "algorithm", "bias", "usepredictors", "spatial")
 results <- results[ , o]
 
@@ -246,6 +240,7 @@ results <- merge(results, species_info)
 #  old <- fromJSON("results.json")
 #  res <- rbindlist(list(results, old), fill = TRUE)
 #}
+
 
 
 

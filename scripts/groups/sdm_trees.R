@@ -1,14 +1,10 @@
 
-# the main difference with trees is that we remove the observations coming from the inventaire forestier
-
 ### Background #################################################
 
 background_atlas <- atlas |> 
   filter(kingdom %in% c("Plantae")) |>
   #filter(!dataset_name %in% c("Données de localisation des grands mammifères")) |>
-  collect() |>
-  (\(x) x[!grepl("Placettes-échantillons", x$dataset_name), ])()# |>
-  #count(dataset_name) |> arrange(-n)
+  collect()
 
 background_gbif <- gbif |> 
   filter(kingdom %in% c("Plantae")) |>
@@ -20,8 +16,7 @@ obs_atlas <- atlas |>
   filter(genus == !!genus) |> 
   collect() |>
   mutate(species = sapply(strsplit(valid_scientific_name, " "), function(i){paste(i[1:2], collapse = " ")})) |>
-  filter(species == !!sp) |>
-  (\(x) x[!grepl("Placettes-échantillons", x$dataset_name), ])()
+  filter(species == !!sp)
 
 obs_gbif <- gbif |>
   filter(species == !!sp) |>

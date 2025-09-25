@@ -28,46 +28,6 @@ predictors <- c(predictors, xy, dummy)
 
 predictors <- wrap(predictors)
 
-
-###########################################
-### Build mesh for ewlgcpSDM ##############
-
-if(any(results$algorithm == "ewlgcpSDM")){
-
-    cat(paste("Running: dmesh","/",Sys.time(),"\n"))
-
-    ### Build mesh
-    domain <- st_sample(st_buffer(region, 5000), 5000)
-    domain <- inla.nonconvex.hull(st_coordinates(domain), convex = -0.015, resolution = 75)
-
-    edge <- min(c(diff(st_bbox(region)[c(1, 3)]) * dmesh_resolution, diff(st_bbox(region)[c(2, 4)]) * dmesh_resolution))
-    edge
-
-    mesh <- inla.mesh.2d(loc.domain = NULL,
-                        max.edge = c(edge, edge * 3),
-                        min.angle = 21,
-                        cutoff = edge / 1,
-                        offset = c(edge, edge * 3),
-                        boundary = domain,#inla.mesh.segment(domainloc),
-                        crs = st_crs(region))
-
-    #plan(multisession, workers = 15)
-    dmesh <- dmesh_mesh(mesh)
-    #plan(sequential)
-
-    ### Compute weights
-    dmesh <- dmesh_weights(dmesh, region)
-
-    ### Summarize predictors
-    #plan(multisession, workers = 6)
-    dmesh <- dmesh_predictors(dmesh, predictors, progress = FALSE)
-    #plan(sequential)
-
-}
-
-
-
-
 ### download from stac catalogue
 
 #deciduous<-crop(rast("https://object-arbutus.cloud.computecanada.ca/bq-io/io/earthenv/landcover/consensus_full_class_3.tif"),vect(st_transform(region,4326)))
