@@ -25,10 +25,10 @@ library(dplyr)
 library(sdmtools)
 
 i <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID"))
-i <- 1
+#i <- 1
 
 args <- commandArgs(trailingOnly=TRUE)
-args <- "ebv_pffq_plants.R"
+#args <- "ebv_pffq_plants.R"
 
 source("scripts/sdm_utils.R")
 

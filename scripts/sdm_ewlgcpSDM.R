@@ -29,7 +29,7 @@ if(any(params$algorithm == "ewlgcpSDM")){
                         boundary = domain,#inla.mesh.segment(domainloc),
                         crs = st_crs(region))
 
-    #plan(multisession, workers = 15)
+    plan(multisession, workers = 5)
     dmesh <- dmesh_mesh(mesh)
     #plan(sequential)
 
@@ -37,9 +37,9 @@ if(any(params$algorithm == "ewlgcpSDM")){
     dmesh <- dmesh_weights(dmesh, region)
 
     ### Summarize predictors
-    #plan(multisession, workers = 6)
-    dmesh <- dmesh_predictors(dmesh, predictors, progress = FALSE)
-    #plan(sequential)
+    #plan(multisession, workers = 10)
+    dmesh <- dmesh_predictors(dmesh, predictors, progress = TRUE)
+    plan(sequential)
 
 }
 
@@ -48,10 +48,9 @@ if(any(params$algorithm == "ewlgcpSDM")){
 buff <- st_buffer(obs, effort_buffer_radius) |> st_union()
 dmesh <- dmesh_effort(dmesh, obs = d[d$presence == 1, ], background =d[d$presence %in% c(0, 1), ], buffer = buff, adjust = FALSE)
 
-if(params$usepredictors=="Predictors"){
-  subvars <- c("conifers", "taiga", "deciduous", 
-"temperate_grassland", "wetland", "cropland", "urban", "water", "distfsl", "tmean", "geomflat", "elevation", "sand")
-  subvars <- vars_pool
+if(params$usepredictors == "Predictors"){
+  subvars <- c("conifers", "taiga", "deciduous", "temperate_grassland", "wetland", "cropland", "urban", "water", "distfsl", "tmean", "geomflat", "elevation", "sand")
+  #subvars <- vars_pool
   form <- paste("y ~", paste(c(subvars, "tmean2"), collapse = " + ")) |> as.formula()
 } else {
   form <- paste("y ~", "dummy") |> as.formula()
@@ -66,9 +65,9 @@ m<-ewlgcp(
   adjust = FALSE,
   buffer = FALSE,
   orthogonal = TRUE,
-  prior.beta = NULL,#prior.beta<-list(prec=list(default=1/(0.000000001)^2,Intercept=1/(20)^2),mean=list(default=0,Intercept=0)),
+  prior.beta = list(prec = list(default = 1/(0.5)^2, Intercept = 1/(20)^2, fixed = 1/(0.5)^2), mean = list(default = 0, Intercept = 0, fixed = 0)),
   prior.range = c(5000, 0.01),
-  prior.sigma = if(params$spatial == "Spatial") {c(1, 0.01)} else {c(0.00001, NA)},
+  prior.sigma = if(params$spatial == "Spatial") {c(1, 0.01)} else {c(0.000001, NA)},
   smooth = 2,
   num.threads = 1:1,
   #blas.num.threads=2,

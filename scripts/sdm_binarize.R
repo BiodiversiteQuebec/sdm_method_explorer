@@ -2,9 +2,14 @@
 
 library(smoothr)
 
-threshold <- 0.99
-bufferdist <- 20000
-rangedist <- 50000
+bbox <- st_bbox(obs)
+
+rangewidth <- sqrt(abs(bbox$ymax - bbox$ymin)*abs(bbox$ymax - bbox$ymin) + abs(bbox$xmax - bbox$xmin)*abs(bbox$xmax - bbox$xmin)) * 0.015
+
+
+threshold <- 0.98
+bufferdist <- rangewidth #20000
+rangedist <- rangewidth #50000
 e <- extract(preds, obs)
 e <- e[rev(order(e[,2])), ]
 val <- e[round(threshold * nrow(e)), 2]
@@ -24,7 +29,8 @@ polwith <- st_union(pol[as.logical(lengths(st_intersects(pol, obs)))])
 dis <- as.numeric(st_distance(pol, polwith))
 polfinal <- st_as_sf(st_union(pol[dis <= rangedist]))  
 
-polsmooth <- smooth(polfinal, method = "ksmooth", smoothness = 50)
+polsmooth <- smooth(polfinal, method = "ksmooth", smoothness = 50) |> 
+  st_make_valid()
 ran <- st_intersection(polsmooth, region)
 
 #png("range.png",width=16,height=10,res=400,units="in")

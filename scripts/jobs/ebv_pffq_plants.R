@@ -38,7 +38,7 @@ th_small <- th # for local scale model if any
 
 ### Modeling ##################################################################
 
-algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1, 2, 3, 4)]
+algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1)]
 bias<-c("Bias","noBias")[1]
 usepredictors<-c("Predictors","noPredictors")[1]
 spatial<-c("Spatial","noSpatial")[2]
@@ -54,7 +54,7 @@ add_effort_buffer <- TRUE # add an effort buffer or not
 effort_buffer_radius <- 500000 # in meters
 effort_buffer_n <- 5000 # number of observations in the outside buffer
 
-dmesh_resolution <- 0.002
+dmesh_resolution <- 0.001
 
 ### Variables ###################################################################
 
@@ -84,7 +84,7 @@ species <- species[species %in% plants] # Just keep what is not a tree in VASCAN
 #species <- sample(species_info$species[species_info$group %in% "birds"], 300)
 #species <- sample(species_info$species[species_info$group %in% "trees"], 2)
 #species <- c("Aralia hispida", "Solidago rugosa")
-#species <- c("Picea mariana", "Clintonia borealis") #
+species <- c("Trillium erectum", "Vitis riparia", "Allium tricoccum", "Medeola virginiana", "Uvularia sessilifolia", "Oclemena acuminata", "", "Polystichum braunii", "Veratrum viride", "Solidago macrophylla", "Ageratina altissima") #
 #species <- species[1:10]#
 #species <- NULL # leave NULL if all species should be used
 print(species)
@@ -95,11 +95,22 @@ print(species)
 #atlas |> 
 #  filter(kingdom == "Plantae") |> 
 #  rename(species = valid_scientific_name) |> 
-#  count(dataset_name, species) |>
+#  count(dataset_name) |>
 #  arrange(-n) |>
 #  collect() |>
+#  as.data.frame() |>
+#  head(10)
+
+#atlas |> 
+#  filter(kingdom == "Plantae") |> 
+#  filter(dataset_name == "Points d'observation écologique") |> 
+#  rename(species = valid_scientific_name) |> 
+#  filter(species == "Oclemena acuminata") |>
+#  count(dataset_name, year_obs) |>
+#  arrange(dataset_name, -n) |>
+#  collect() |>
 #  as.data.frame()
-  
+ 
 #atlas |> 
 #  filter(kingdom == "Plantae") |> 
 #  rename(species = valid_scientific_name) |> 
