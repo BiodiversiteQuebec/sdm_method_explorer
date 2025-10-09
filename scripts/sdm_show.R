@@ -29,7 +29,7 @@ add_range <- function(file, add = TRUE){
 }
 
 
-lf<-list.files("outputs/rasters", full = TRUE, pattern = "1950-2024") |> grep("hamame", x = _, value = TRUE)
+lf<-list.files("outputs/rasters", full = TRUE, pattern = "1950-2024") |> grep("veratrum_vi", x = _, value = TRUE)
 png("sdms.png",width=16,height=10,res=400,units="in")
 par(mfrow = n2mfrow(length(lf), asp = 3 / 2))
 r<-lapply(lf,function(i){
@@ -100,3 +100,12 @@ nicheOverlap(raster(r1),raster(r3),stat="I", checkNegatives=FALSE)
 #sudo chown -R frousseu /home
 
 # scp frousseu@sdm:'/home/frousseu/data/sdms/*' C:/Users/rouf1703/Documents/BiodiversitéQuébec/sdm_explorer/sdms
+
+r <- list.files("outputs/ranges", full = TRUE) |>
+  lapply(rast) |>
+  rast() |>
+  sum()
+
+png("stacked.png", width = 5, height = 6, units = "in", res = 300)
+plot(r)
+dev.off()  

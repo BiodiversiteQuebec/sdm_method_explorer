@@ -19,26 +19,22 @@ period <- c("breeding", "yearround", "nonbreeding", "prebreeding", "postbreeding
 target_group <- c("plants")
 
 #vars_pool<-c("conifers", "taiga", "deciduous", "mixed", "temperate_shrubland", "temperate_grassland", "polar_shrubland", "polar_grassland", "polar_barren", "wetland", "cropland", "barren", "urban", "water", "snow", "distfsl", "tmean", "prec", "geomflat", "elevation", "distroads", "sand")
-vars_pool<-c("conifers", "taiga", "deciduous", "mixed", "temperate_shrubland", 
-"temperate_grassland", "polar_shrubland", "polar_grassland", 
-"polar_barren", "wetland", "cropland", "barren", "urban", "water", 
-"snow", "distfsl", "tmean", "prec", "geomflat", "elevation", "sand")
 #vars_pool <- vars_pool[c(1, 4, 17)]
 
 rerun <- TRUE
 
 years <- list( # year wanted or a vector of years, has to be a range for gbif data
-  1950:2024
+  2000:2025
 )
 
 ### minimal coordinate precision
-th <- 20000 
+th <- 2500 
 th_small <- th # for local scale model if any
 
 
 ### Modeling ##################################################################
 
-algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1)]
+algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(4)]
 bias<-c("Bias","noBias")[1]
 usepredictors<-c("Predictors","noPredictors")[1]
 spatial<-c("Spatial","noSpatial")[2]
@@ -51,10 +47,10 @@ background_min <- 5000 # overall min nb of background points
 background_max <- 10000000 # overall max nb of background points
 
 add_effort_buffer <- TRUE # add an effort buffer or not
-effort_buffer_radius <- 500000 # in meters
-effort_buffer_n <- 5000 # number of observations in the outside buffer
+effort_buffer_radius <- 250000 # in meters
+effort_buffer_n <- 400000 # number of observations in the outside buffer
 
-dmesh_resolution <- 0.001
+dmesh_resolution <- 0.002
 
 ### Variables ###################################################################
 
@@ -72,20 +68,26 @@ aires <- st_read("data/aires_repartition_pffq.gpkg") |>
   mutate(species = sub("^(([^ ]+ )[^ ]+).*", "\\1", NOM_SCI)) |>
   mutate(species = case_match(species, 
     "Lonicera villosa" ~ "Lonicera caerulea", 
+    #"Athyrium filix-femina" ~ "Athyrium angustum",
+    #"Osmunda regalis" ~ "Osmunda spectabilis",
+    #"Matteuccia struthiopteris" ~ "Matteuccia pensylvanica",
     .default = species))
 species <- unique(aires$species)
 
 vascan <- read.csv("data/vascan.txt", sep = "\t")
 vascan <- vascan[vascan$Rank == "Species", ]
-plants <- vascan$Scientific.name[!grepl("Tree", vascan$Habit)]
+#plants <- vascan$Scientific.name[!grepl("Tree", vascan$Habit)]
+plants <- vascan$Scientific.name
 
-species <- species[species %in% plants] # Just keep what is not a tree in VASCAN
+species <- species[!species %in% plants] # Just keep what is not a tree in VASCAN
 
 #species <- sample(species_info$species[species_info$group %in% "birds"], 300)
 #species <- sample(species_info$species[species_info$group %in% "trees"], 2)
 #species <- c("Aralia hispida", "Solidago rugosa")
-species <- c("Trillium erectum", "Vitis riparia", "Allium tricoccum", "Medeola virginiana", "Uvularia sessilifolia", "Oclemena acuminata", "", "Polystichum braunii", "Veratrum viride", "Solidago macrophylla", "Ageratina altissima") #
-#species <- species[1:10]#
+#species <- c("Trillium erectum", "Vitis riparia", "Allium tricoccum", "Medeola virginiana", "Uvularia sessilifolia", "Oclemena acuminata", "Polystichum braunii", "Veratrum viride", "Solidago macrophylla", "Ageratina altissima", "Viola labradorica") #
+#species <- c("Viola labradorica")
+set.seed(1234)
+#species <- sample(species, 40)
 #species <- NULL # leave NULL if all species should be used
 print(species)
 
@@ -131,7 +133,7 @@ ebird <- duckdbfs::open_dataset("data/ebd_relJan-2025.parquet")
 
 
 species_info <- atlas |>
-  filter(kingdom %in% c("Plantae")) |>
+  filter(kingdom %in% c("Plantae", "Fungi")) |>
   mutate(taxon = tolower(group_en)) |>
   mutate(start = "01-01") |>
   mutate(end = "12-31") |>

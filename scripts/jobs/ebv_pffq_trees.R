@@ -19,10 +19,6 @@ period <- c("breeding", "yearround", "nonbreeding", "prebreeding", "postbreeding
 target_group <- c("trees")
 
 #vars_pool<-c("conifers", "taiga", "deciduous", "mixed", "temperate_shrubland", "temperate_grassland", "polar_shrubland", "polar_grassland", "polar_barren", "wetland", "cropland", "barren", "urban", "water", "snow", "distfsl", "tmean", "prec", "geomflat", "elevation", "distroads", "sand")
-vars_pool<-c("conifers", "taiga", "deciduous", "mixed", "temperate_shrubland", 
-"temperate_grassland", "polar_shrubland", "polar_grassland", 
-"polar_barren", "wetland", "cropland", "barren", "urban", "water", 
-"snow", "distfsl", "tmean", "prec", "geomflat", "elevation", "sand")
 #vars_pool <- vars_pool[c(1, 4, 17)]
 
 rerun <- TRUE

@@ -1,16 +1,16 @@
 #!/bin/bash
-#SBATCH --array=1-10%10
+#SBATCH --array=1-31%31
 #SBATCH --account=rpp-gonzalez
-#SBATCH --time=06:00:00
-#SBATCH --cpus-per-task=5
-#SBATCH --mem=300G
-#SBATCH --job-name=ebv_pffq_plants_inla
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=70G
+#SBATCH --job-name=ebv_pffq_plants
 ##SBATCH --mail-user=francois.rousseu@usherbrooke.ca
 ##SBATCH --mail-type=ALL
 
 echo $SLURM_ARRAY_TASK_ID
 module load StdEnv/2023 gcc/12.3 r/4.5.0 geos/3.12.0 gdal/3.9.1 udunits/2.2.28 gsl/2.7 jags/4.3.2
-export JAVA_TOOL_OPTIONS="-Xmx200g" # for Maxent
+export JAVA_TOOL_OPTIONS="-Xmx250g" # for Maxent
 #export NODE_OPTIONS="--max-old-space-size=102400" # for concaveman V8 engine
 Rscript scripts/sdm_runs.R ebv_pffq_plants.R
 

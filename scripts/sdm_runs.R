@@ -25,7 +25,7 @@ library(dplyr)
 library(sdmtools)
 
 i <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID"))
-#i <- 1
+#i <- 18
 
 args <- commandArgs(trailingOnly=TRUE)
 #args <- "ebv_pffq_plants.R"
@@ -51,6 +51,10 @@ github_user <- "frousseu"
 github_token_path <- "/home/frousseu/.ssh/github_token"
 repo <- "BiodiversiteQuebec/sdm_method_explorer"
 
+source("scripts/sdm_prelim.R")
+source("scripts/sdm_predictors.R")
+source("scripts/sdm_variables.R")
+
 job <- gsub("\\.R|\\.r", "", args)
 source(file.path("scripts/jobs", args))
 sprintf("Species: %s", results$species[i])
@@ -60,8 +64,8 @@ sprintf("Species: %s", results$species[i])
 reposnapshot <- "testcommit"#get_repo_snapshot(repo, github_user, github_token_path)
 results$reposnapshot <- reposnapshot
 
-source("scripts/sdm_prelim.R")
-source("scripts/sdm_predictors.R")
+
+
 
 #nworkers<-min(c(length(runs), 3))
 #options(mc.cores=nworkers)
@@ -83,13 +87,17 @@ genus <- strsplit(sp, " ")[[1]][1]
 source(file.path("scripts/groups", paste0("sdm_", group, ".R")))
 source("scripts/sdm_data.R")
 
+png("bg.png", width = 6, height = 6, units = "in", res = 200)
+plot(st_geometry(qc))
+plot(st_geometry(bg), add = TRUE)
+plot(st_geometry(obs), col = "orange", add = TRUE)
+dev.off()
+
 if(nrow(obs) < 5){
   checkpoint("Aborting:")
   cat("\nToo few observations, returning NULL")
   return(NULL)
 }
-
-#source("scripts/sdm_background.R")
 
 switch(params$algorithm,
         maxent={

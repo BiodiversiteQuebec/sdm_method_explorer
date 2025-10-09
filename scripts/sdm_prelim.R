@@ -1,6 +1,8 @@
 
 cat(paste("Running: prelim","/",Sys.time(),"\n"))
 
+#sf_proj_network(FALSE) # not working https://github.com/r-spatial/sf/issues/2391
+
 epsg <- 6624
 
 # Downloads polygons using package geodata

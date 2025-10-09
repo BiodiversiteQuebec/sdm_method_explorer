@@ -29,10 +29,11 @@ add_range <- function(){
    if(exists("aires")){
      w <- which(aires$species == sp)
      if(any(w)){
-       plot(st_geometry(aires[w, ]), border = adjustcolor("black", 0.25), lwd = 0.75, col = NA, add = TRUE) 
+       plot(st_geometry(aires[w, ]), border = adjustcolor("black", 0.25), lwd = 1.5, col = NA, add = TRUE) 
      }
    }   
    plot(st_geometry(ran), col = adjustcolor("black", 0.10), border = NA, add = TRUE)
+   #plot(st_geometry(b), col = NA, border = adjustcolor("black", 0.30), lty = 3, add = TRUE)
 }
 
 xxx <- ext(preds)$xmin + 0.80 * abs((ext(preds)$xmax - ext(preds)$xmin))
@@ -48,10 +49,10 @@ filename <- paste(params$group, tolower(gsub(" ","_",params$species)), params$ye
 
 png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 300)
 plot(preds, axes = FALSE, add = FALSE, plg = plg, col = sdm_cols, mar = c(0.5, 0.5, 0.5, 0.5))
-add_range()
 plot(st_geometry(st_intersection(region, na)), lwd = 0.1, border = adjustcolor("black", 0.75), add = TRUE)
 plot(st_geometry(lakes), col = "white", lwd = 0.1, border = adjustcolor("black", 0.5), add = TRUE)
 points(st_geometry(obs), bg = adjustcolor("orange", 0.80), col = "black", pch = 21, cex = 0.3, lwd= 0.1)
+add_range()
 dev.off()
 
 

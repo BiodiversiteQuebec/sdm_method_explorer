@@ -11,7 +11,7 @@ library(predicts)
 
 m <- MaxEnt(unwrap(predictors)[[vars]], 
              vect(d[d$presence==1,]), vect(d[d$presence==0,]),
-             removeDuplicates=FALSE,
+             removeDuplicates=TRUE,
              silent=FALSE,
              #args=c("replicatetype=bootstrap","replicates=1","threads=4")
              #args=c("linear","quadratic","product","hinge","nothreshold","replicatetype=bootstrap","replicates=1","threads=4")

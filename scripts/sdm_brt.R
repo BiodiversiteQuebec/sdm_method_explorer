@@ -5,20 +5,26 @@ library(dismo)
 library(lightgbm)
 
 dat$presence <- as.integer(as.character(dat$presence))
+dat2 <- dat[c(sample(which(dat$presence == 0), sum(dat$presence == 1) * 4), which(dat$presence == 1)), ]
 
-X <- data.matrix(dat[ , -match(c("presence"), names(dat))])
-Y <- dat$presence
+X <- data.matrix(dat2[ , -match(c("presence"), names(dat2))])
+Y <- dat2$presence
 
 m <- lightgbm(
   data = X
   , label = Y
   , params = list(
-    num_leaves = 10L
-    , learning_rate = 0.02
-    , objective = "binary"
+    max_depth = 4, # none4
+    num_leaves = 5L, # 10L5
+    learning_rate = 0.02, # 0.02
+    #is_unbalance = TRUE,
+    max_bin = 100,
+    #bagging_fraction = 0.005,
+    #max_bin = ,
+    objective = "binary"
   )
   , nrounds = 2000L
-  , verbose = -1L
+  , verbose = 1L
 )
 
 inv_logit <- function(x) {

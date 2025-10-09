@@ -5,10 +5,15 @@ library(terra)
 library(sf)
 library(ewlgcpSDM)
 
-predictors <- rast("data/predictors_300.tif")
-predictors <- aggregate(predictors, 4, na.rm = TRUE)
-predictors <- predictors[[vars_pool]]
-predictors <- crop(predictors, vect(st_transform(region, st_crs(predictors))), mask = TRUE, touches = FALSE)
+#predictors <- rast("data/predictors_300.tif")
+#predictors <- rast("data/predictors_500_QC.tif")
+#predictors <- rast("data/predictors_100_QC.tif")
+predictors <- rast("data/predictors_200_QC.tif")
+predictors <- resample(predictors, rast(ext(st_buffer(region, 25000)), resolution = 2500), method = "average")
+#writeRaster(p, "data/predictors_200_QC.tif", overwrite = TRUE)
+#predictors <- aggregate(predictors, 2, na.rm = TRUE)
+#predictors <- predictors[[vars_pool]]
+predictors <- crop(predictors, vect(st_transform(st_buffer(region, 25000), st_crs(predictors))), mask = TRUE, touches = FALSE)
 if(crs(predictors) != crs(region)){
     predictors <- project(predictors, crs(region), threads = 4)
 }
@@ -24,9 +29,9 @@ dummy <- init(predictors[[1]], fun = 1)
 names(dummy) <- "dummy"
 
 
-predictors <- c(predictors, xy, dummy)
+predictors <- c(predictors, x, y, xy, dummy)
 
-predictors <- wrap(predictors)
+#predictors <- wrap(predictors)
 
 ### download from stac catalogue
 
@@ -42,3 +47,10 @@ predictors <- wrap(predictors)
 
 #predictors<-c(deciduous,crops,maxtemp)
 #names(predictors)<-c("deciduous","crops","maxtemp")
+
+
+if(FALSE){
+png("predictors.png", width = 12, height = 10, units = "in", res = 300)
+plot(predictors, mar = c(0, 0, 1, 0), axes = FALSE)
+dev.off()
+}

@@ -107,8 +107,8 @@ if(background_cap){
     nbackground <- background_max
   }
 }
-  
-bg <- bg[sample(1:nrow(bg), nbackground), ]
+#bg <- bg[sample(1:nrow(bg), nbackground), ] # do not limit background here by silencing
+#bg <- bg[sample(1:nrow(bg), max(c(2000, nrow(obs) * 2))), ] # do not limit background here by silencing
 
 
 mult <- 50 # multiply by this value to get more background points from which to resample to get the desired value (in cases of NAs)
@@ -125,23 +125,41 @@ if(add_effort_buffer){
 }
 
 
+cat(sprintf("Nb obs: %s - Nb bg: %s - Nb bg buffer: %s\n", nrow(obs), nrow(bg), effort_buffer_n))
+
+
+vars <- adjust_vars(vars_pool, params)
+
+
 presence <- c(rep(1, nrow(obs)), rep(0, nrow(bg)))
 n <- intersect(names(obs), names(bg))
 bg <- rbind(obs[, n], bg[, n])
 
 d <- cbind(presence, bg)
-e <- terra::extract(unwrap(predictors), d, ID = FALSE)
+e <- terra::extract(unwrap(predictors[[vars]]), d, ID = FALSE)
 nas <- !apply(e, 1, function(i){any(is.na(i))})
 d <- cbind(d, e)
 d <- d[nas, ]
-w <- which(d$presence == 0)
-s <- sample(w, min(c(length(w), nbackground * mult))) 
-k <- which(d$presence == 1)
-d <- d[c(k, s), ]
+#w <- which(d$presence == 0)
+#s <- sample(w, min(c(length(w), nbackground * mult))) 
+#k <- which(d$presence == 1)
+#d <- d[c(k, s), ]
 dat <- st_drop_geometry(d)
 
-vars <- adjust_vars(vars_pool, params)
+
 dat <- dat[, c("presence", vars)]
+
+if(FALSE){
+png("points.png", width = 12, height = 10, units = "in", res = 300)
+plot(st_geometry(qc))
+plot(st_geometry(region), add = TRUE)
+plot(st_geometry(d), axes = FALSE, add = TRUE)
+plot(st_geometry(d[!nas, ]), col = "red", add = TRUE)
+dev.off()
+}
+
+
+
 
 
 
@@ -152,6 +170,44 @@ dat <- dat[, c("presence", vars)]
 ####################################################################
 
 ####################################################################
+
+
+if(FALSE){
+ 
+
+  agg <- predictors[[1]]
+  #agg <- aggregate(predictors[[1]], 2)
+
+  r1 <- rasterize(obs, agg, fun = "count", background = 0)
+  r2 <- rasterize(bg, agg, fun = "count", background = 0)
+
+  
+
+
+  r12 <- r1/r2
+  #r12[r12 >= rev(sort(values(r12)[, 1]))[20]] <- NA
+
+  o <- rev(order(values(r12)[, 1], na.last = FALSE))
+  values(r12)[o, 1][1:50]
+  values(r2)[o, 1][1:50]
+
+  r12 <- r12 * r2
+
+  r12 <- aggregate(r12, 2, fun = max, na.rm = TRUE)
+
+  
+  fn <- paste0(gsub(" ", "_", sp), "_raw.png")
+  png(file.path("outputs/graphics", fn), units = "in", height = 6, width = 5, res = 300)
+  plot(r12)
+  dev.off()
+
+
+}
+
+
+
+
+
 
 if(FALSE){
 
