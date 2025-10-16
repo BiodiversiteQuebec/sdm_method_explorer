@@ -9,7 +9,7 @@ library(ewlgcpSDM)
 #predictors <- rast("data/predictors_500_QC.tif")
 #predictors <- rast("data/predictors_100_QC.tif")
 predictors <- rast("data/predictors_200_QC.tif")
-predictors <- resample(predictors, rast(ext(st_buffer(region, 25000)), resolution = 2500), method = "average")
+predictors <- resample(predictors, rast(ext(st_buffer(region, 25000)), resolution = 1000), method = "average")
 #writeRaster(p, "data/predictors_200_QC.tif", overwrite = TRUE)
 #predictors <- aggregate(predictors, 2, na.rm = TRUE)
 #predictors <- predictors[[vars_pool]]

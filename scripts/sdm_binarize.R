@@ -54,7 +54,7 @@ filename <- paste(params$group, tolower(gsub(" ","_",params$species)), params$ye
 
 st_write(ran, file.path("outputs/polygons", filename), layer = params$species, append = FALSE, delete_dsn = TRUE, delete_layer = TRUE)
 
-filename2 <- gsub(" ","_",params$species) |> paste0(".tif")
+filename2 <- gsub(" ","_",params$species) |> paste0("_1000.tif")
 
 rran <- terra::rasterize(ran, predictors[[1]], background = 0, touches = TRUE) |>
           crop(region, mask = TRUE)

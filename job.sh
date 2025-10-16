@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --array=1-31%31
+#SBATCH --array=235-298%100
 #SBATCH --account=rpp-gonzalez
 #SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=2
-#SBATCH --mem=70G
+#SBATCH --mem=100G
 #SBATCH --job-name=ebv_pffq_plants
 ##SBATCH --mail-user=francois.rousseu@usherbrooke.ca
 ##SBATCH --mail-type=ALL

@@ -68,18 +68,27 @@ aires <- st_read("data/aires_repartition_pffq.gpkg") |>
   mutate(species = sub("^(([^ ]+ )[^ ]+).*", "\\1", NOM_SCI)) |>
   mutate(species = case_match(species, 
     "Lonicera villosa" ~ "Lonicera caerulea", 
-    #"Athyrium filix-femina" ~ "Athyrium angustum",
-    #"Osmunda regalis" ~ "Osmunda spectabilis",
-    #"Matteuccia struthiopteris" ~ "Matteuccia pensylvanica",
+    "Athyrium filix-femina" ~ "Athyrium angustum",
+    "Osmunda regalis" ~ "Osmunda spectabilis",
+    "Matteuccia struthiopteris" ~ "Matteuccia pensylvanica",
     .default = species))
 species <- unique(aires$species)
+
+#aires <- st_read("data/aires_repartition_pffq.gpkg") 
+#r <- rast(ext = ext(aires), resolution = 10000)
+#r <- rasterize(aires, r, fun = "count", background = 0)
+
+
+
+
+
 
 vascan <- read.csv("data/vascan.txt", sep = "\t")
 vascan <- vascan[vascan$Rank == "Species", ]
 #plants <- vascan$Scientific.name[!grepl("Tree", vascan$Habit)]
 plants <- vascan$Scientific.name
 
-species <- species[!species %in% plants] # Just keep what is not a tree in VASCAN
+#species <- species[!species %in% plants] # Just keep what is not a tree in VASCAN
 
 #species <- sample(species_info$species[species_info$group %in% "birds"], 300)
 #species <- sample(species_info$species[species_info$group %in% "trees"], 2)

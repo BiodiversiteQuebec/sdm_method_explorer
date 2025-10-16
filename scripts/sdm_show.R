@@ -101,7 +101,7 @@ nicheOverlap(raster(r1),raster(r3),stat="I", checkNegatives=FALSE)
 
 # scp frousseu@sdm:'/home/frousseu/data/sdms/*' C:/Users/rouf1703/Documents/BiodiversitéQuébec/sdm_explorer/sdms
 
-r <- list.files("outputs/ranges", full = TRUE) |>
+r <- list.files("outputs/ranges", full = TRUE)[1] |>
   lapply(rast) |>
   rast() |>
   sum()
