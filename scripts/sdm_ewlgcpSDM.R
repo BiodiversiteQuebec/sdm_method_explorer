@@ -112,7 +112,9 @@ write_preds(preds)
 auc<-NA
 I<-niche_overlap()
 
-write_results()
+params$auc <- auc
+params$I <- I
+params$time <- Sys.time()
 
 checkpoint("Done:")
 

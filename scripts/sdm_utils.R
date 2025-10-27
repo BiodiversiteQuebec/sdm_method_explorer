@@ -59,20 +59,23 @@ adjust_vars<-function(vars,params){
   vars
 }
 
-write_results<-function(){
+write_results<-function(file, product, ext){
   #x<-fread("results.csv")
+  #setDT(res)
   res <- params
-  res$auc <- auc
-  res$I <- I
-  res$time <- Sys.time()
-  setDT(res)
-  write_json(res, paste0("json/results", formatC(i, width = 6, flag = 0), ".json"))
+  f <- paste(file, product, sep = "_")
+  res$product <- product
+  res$ext <- ext
+  res$file <- paste0(f, ".", ext)
+  #write_json(res, paste0("json/results", formatC(i, width = 6, flag = 0), ".json"))
+  write_json(res, paste0("json/", f, ".json"))
   #a <- a[, names(x), with = FALSE]
   #x <- rbind(x, a)
   #x <- x[rev(order(time)),]
   #x <- unique(x, by = c("species", "algorithm", "bias", "usepredictors", "spatial", "reposnapshot"))
   #fwrite(x, "results.csv", append = TRUE)
   #print(x[1, ])
+  res$file
 }
 
 add_results <- function(){

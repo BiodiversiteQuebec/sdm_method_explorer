@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --array=235-298%100
+#SBATCH --array=1-4%4
 #SBATCH --account=rpp-gonzalez
 #SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=2

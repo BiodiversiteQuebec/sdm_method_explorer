@@ -28,29 +28,47 @@ names(xy) <- "xy"
 dummy <- init(predictors[[1]], fun = 1)
 names(dummy) <- "dummy"
 
-
 predictors <- c(predictors, x, y, xy, dummy)
 
-#predictors <- wrap(predictors)
 
-### download from stac catalogue
+### Habitat associations raster
+category <- c("Temperate or sub-polar needleleaf forest",
+              "Sub-polar taiga needleleaf forest",
+              "Tropical or sub-tropical broadleaf evergreen forest",
+              "Tropical or sub-tropical broadleaf deciduous forest",
+              "Temperate or sub-polar broadleaf deciduous forest",
+             "Mixed Forest",
+              "Tropical or sub-tropical shrubland",
+              "Temperate or sub-polar shrubland",
+              "Tropical or sub-tropical grassland",
+              "Temperate or sub-polar grassland",
+             "Sub-polar or polar shrubland-lichen-moss",
+              "Sub-polar or polar grassland-lichen-moss",
+              "Sub-polar or polar barren-lichen-moss",
+              "Wetland",
+             "Cropland",
+              "Barren lands",
+              "Urban",
+              "Water",
+              "Snow and Ice")
 
-#deciduous<-crop(rast("https://object-arbutus.cloud.computecanada.ca/bq-io/io/earthenv/landcover/consensus_full_class_3.tif"),vect(st_transform(region,4326)))
-#crops<-crop(rast("https://object-arbutus.cloud.computecanada.ca/bq-io/io/earthenv/landcover/consensus_full_class_7.tif"),vect(st_transform(region,4326)))
-#maxtemp<-crop(rast("https://object-arbutus.cloud.computecanada.ca/bq-io/io/CHELSA/climatologies/CHELSA_bio5_1981-2010_V.2.1.tif"),vect(st_transform(region,4326)))
-#bb<-st_bbox(region)
-#predictors<-rast(ext(bb),resolution=2000,crs=crs(region))
+dat <- data.frame(code = c(0, seq_along(category)), category = c("No data", category))
 
-#deciduous<-project(deciduous,predictors)
-#crops<-project(crops,predictors)
-#maxtemp<-project(maxtemp,predictors)
+ha <- rast("data/NA_NALCMS_landcover_2020_30m.tif")
+levels(ha) <- dat
 
-#predictors<-c(deciduous,crops,maxtemp)
-#names(predictors)<-c("deciduous","crops","maxtemp")
+ha <- crop(ha, st_transform(qc, st_crs(ha)))
+ha <- aggregate(ha, 10, fun = "modal") |>
+  crop(st_transform(qc, st_crs(ha)), mask = TRUE) |>
+  droplevels()
+
+
+
+
 
 
 if(FALSE){
-png("predictors.png", width = 12, height = 10, units = "in", res = 300)
-plot(predictors, mar = c(0, 0, 1, 0), axes = FALSE)
-dev.off()
+    png("predictors.png", width = 12, height = 10, units = "in", res = 300)
+    plot(predictors, mar = c(0, 0, 1, 0), axes = FALSE)
+    dev.off()
 }

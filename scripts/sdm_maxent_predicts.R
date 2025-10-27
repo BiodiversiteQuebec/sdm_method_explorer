@@ -34,7 +34,9 @@ write_preds(preds)
 auc<-unname(m@results[row.names(m@results)=="Training.AUC", 1])
 I<-niche_overlap()
 
-write_results()
+params$auc <- auc
+params$I <- I
+params$time <- Sys.time()
 
 checkpoint("Done:")
 

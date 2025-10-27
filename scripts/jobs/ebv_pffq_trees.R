@@ -34,7 +34,10 @@ th_small <- th # for local scale model if any
 
 ### Modeling ##################################################################
 
-algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(1, 2, 3, 4)]
+models_all <- c("ewlgcpSDM","randomForest","brt","maxent")
+algorithms_all <- c("ewlgcpSDM","randomForest","brt","maxent")
+
+models <- models_all[c(3:4)]
 bias<-c("Bias","noBias")[1]
 usepredictors<-c("Predictors","noPredictors")[1]
 spatial<-c("Spatial","noSpatial")[2]
@@ -178,15 +181,16 @@ results <- expand.grid(job = job,
                        species = species, 
                        target_group = target_group, 
                        years = yearparams, 
-                       algorithm = algorithms, 
+                       model = models, 
                        bias = bias,
                        usepredictors = usepredictors, 
                        spatial = spatial, 
                        stringsAsFactors = FALSE)
 
 results$period <- period
-results$period_dates <- periodparams#[match(results$species, species)]
-o <- c("job", "group", "species", "years", "period", "period_dates", "target_group", "algorithm", "bias", "usepredictors", "spatial")
+results$dates <- periodparams#[match(results$species, species)]
+results$algorithm <- algorithms_all[match(results$model, models_all)]
+o <- c("job", "group", "species", "years", "period", "dates", "target_group", "model", "algorithm", "bias", "usepredictors", "spatial")
 results <- results[ , o]
 
 #for file in *.tif; do

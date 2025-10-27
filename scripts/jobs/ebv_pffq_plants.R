@@ -34,7 +34,10 @@ th_small <- th # for local scale model if any
 
 ### Modeling ##################################################################
 
-algorithms<-c("ewlgcpSDM","randomForest","brt","maxent")[c(4)]
+models_all <- c("ewlgcpSDM","randomForest","brt","maxent")
+algorithms_all <- c("ewlgcpSDM","randomForest","brt","maxent")
+
+models <- models_all[c(3:4)]
 bias<-c("Bias","noBias")[1]
 usepredictors<-c("Predictors","noPredictors")[1]
 spatial<-c("Spatial","noSpatial")[2]
@@ -96,6 +99,7 @@ plants <- vascan$Scientific.name
 #species <- c("Trillium erectum", "Vitis riparia", "Allium tricoccum", "Medeola virginiana", "Uvularia sessilifolia", "Oclemena acuminata", "Polystichum braunii", "Veratrum viride", "Solidago macrophylla", "Ageratina altissima", "Viola labradorica") #
 #species <- c("Viola labradorica")
 set.seed(1234)
+species <- c("Abies balsamea", "Picea mariana")
 #species <- sample(species, 40)
 #species <- NULL # leave NULL if all species should be used
 print(species)
@@ -226,15 +230,16 @@ results <- expand.grid(job = job,
                        species = species, 
                        target_group = target_group, 
                        years = yearparams, 
-                       algorithm = algorithms, 
+                       model = models, 
                        bias = bias,
                        usepredictors = usepredictors, 
                        spatial = spatial, 
                        stringsAsFactors = FALSE)
 
 results$period <- period
-results$period_dates <- periodparams#[match(results$species, species)]
-o <- c("job", "group", "species", "years", "period", "period_dates", "target_group", "algorithm", "bias", "usepredictors", "spatial")
+results$dates <- periodparams#[match(results$species, species)]
+results$algorithm <- algorithms_all[match(results$model, models_all)]
+o <- c("job", "group", "species", "years", "period", "dates", "target_group", "model", "algorithm", "bias", "usepredictors", "spatial")
 results <- results[ , o]
 
 #for file in *.tif; do
@@ -262,7 +267,7 @@ if(!rerun){
     }) |>
     do.call("rbind", args = _) |>
     as.data.table() |>
-    setnames(c("group", "species", "years", "period", "period_dates", "algorithm", "usepredictors", "bias", "spatial"))
+    setnames(c("group", "species", "years", "period", "dates", "model", "algorithm", "usepredictors", "bias", "spatial"))
     
   results <- fsetdiff(setDT(results[, names(x)]), x, all = FALSE) |> as.data.frame()
 

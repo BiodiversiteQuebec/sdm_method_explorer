@@ -25,7 +25,7 @@ library(dplyr)
 library(sdmtools)
 
 i <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID"))
-#i <- 18
+#i <- 1
 
 args <- commandArgs(trailingOnly=TRUE)
 #args <- "ebv_pffq_plants.R"
@@ -80,6 +80,7 @@ t1 <- Sys.time()
 #source("scripts/sdm_utils.R")
 
 params <- lapply(as.list(results),"[", i)
+params$vars <- unlist(params$vars, use.names = FALSE)
 
 sp <- params$species
 genus <- strsplit(sp, " ")[[1]][1]
@@ -119,6 +120,10 @@ source("scripts/sdm_graphics.R")
 
 t2 <- Sys.time() 
 message(paste("Minutes:", round(as.numeric(difftime(t2, t1, units = "mins")), 2), "\n"))
+
+
+
+
   
 #},future.conditions="message", future.globals = ls(), future.packages = names(sessionInfo()$otherPkgs))
 #plan(sequential)
