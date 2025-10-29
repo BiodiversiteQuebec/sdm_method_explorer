@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDM BQ</title>
+<script type='text/javascript' src="https://object-arbutus.cloud.computecanada.ca/bq-io/explorer/species.js"></script>
+<style>
+  :root {
+    --main-green: #c9d2d0; /* #2e7d32; */
+    --dark-green: #c9d2d0; /* #1b5e20; */
+    --light-green: #c9d2d0; /* #e8f5e9; */
+    --green: #2e7d32aa;
+  }
+
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, sans-serif;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  header {
+    background: var(--main-green);
+    color: white;
+    padding: 1rem;
+    font-size: 1.8rem;
+    text-align: center;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    background: #ffffff;
+    border-bottom: 0px solid #ccc;
+  }
+
+  .controls-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  select {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    min-width: 180px;
+  }
+
+  .species-image {
+    width: 15vh;
+    height: 15vh;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid #eee;
+    transition: opacity 0.3s ease;
+  }
+
+  .main-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .row {
+    display: flex;
+    flex: 1;
+    border-top: 1px solid #eee;
+  }
+
+  .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: #ffffff;
+    margin: 1vh;
+  }
+
+  .panel img {
+    max-width: 90%;
+    max-height: 60vh;
+    border-radius: 10px;
+    box-shadow: 0 0px 0px rgba(0,0,0,0.25);
+    object-fit: contain;
+    transition: opacity 0.3s ease;
+  }
+
+  .panel-label {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #fff;
+    color: var(--green);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .info-text {
+    margin-top: 0.5rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: #333;
+    max-width: 90%;
+  }
+
+  .button-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 0.6rem;
+    background: #ffffff;
+    border-top: 0px solid #ddd;
+  }
+
+  .button-row button {
+    background: white;
+    color: var(--main-green);
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 2vh;
+  }
+
+  .button-row button:hover {
+    color: var(--dark-green);
+    font-weight: 600;
+  }
+
+  .button-obs {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    padding: 0;
+    margin: 0;
+    background: #ffffff;
+    border-top: 0px solid #ddd;
+  }
+
+  .button-obs button {
+    background: white;
+    color: var(--main-green);
+    border: none;
+    border-radius: 8px;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.8rem;
+  }
+
+  .button-obs button:hover {
+    color: var(--dark-green);
+    font-weight: 600;
+  }
+
+
+
+  table {
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+  }
+
+  th, td {
+    border: 1px solid #ccc;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  th {
+    background: var(--main-green);
+    color: white;
+  }
+
+  /* Responsive adjustments */
+  @media(max-width: 1000px) {
+    .row {
+      flex-direction: column;
+    }
+    .panel img {
+      max-height: 30vh;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header><img src="https://biodiversite-quebec.ca/images/FRVersion-Hero-top.png" alt="BQ logo" height="50">SDM</header>
+
+<div class="controls">
+  <div class="controls-left">
+    <select id="group">
+      <!--<option value="trees">Trees</option>-->
+      <!--<option value="plants">Plants</option>-->
+    </select>
+    <select id="species">
+      <!--<option value="Fraxinus americana">Fraxinus americana</option>-->
+    </select>
+  </div>
+  <img id="species-img" class="species-image" src="" alt="Species image">
+</div>
+
+<div class="main-container">
+
+  <!-- Row 1: Model Map + Range Map -->
+  <div class="row">
+    <div class="panel" id="map-panel">
+      <div class="panel-label">Model Map</div>
+      <img id="map-img" src="" alt="Model map">
+      <div class="button-obs" id="map-panel-buttons-obs"></div>
+      <div class="info-text" id="map-text">Select a species to view model maps.</div>
+      <div class="button-row" id="map-panel-buttons"></div>
+    </div>
+    <div class="panel" id="range-panel">
+      <div class="panel-label">Range Map</div>
+      <img id="range-img" src="" alt="Range map">
+      <div class="button-obs" id="range-panel-buttons-obs"></div>
+      <div class="info-text" id="range-text">Select a species to view range maps.</div>
+      <div class="button-row" id="range-panel-buttons"></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Projection Model + Projection Range -->
+  <div class="row">
+    <div class="panel" id="projmap-panel">
+      <div class="panel-label">Projected Model</div>
+      <img id="projmap-img" src="" alt="Projected model">
+      <div class="button-obs" id="projmap-panel-buttons-obs"></div>
+      <div class="info-text" id="projmap-text">Projection model data.</div>
+      <div class="button-row" id="projmap-panel-buttons"></div>
+    </div>
+    <div class="panel" id="projrange-panel">
+      <div class="panel-label">Projected Range</div>
+      <img id="projrange-img" src="" alt="Projected range">
+      <div class="button-obs" id="projrange-panel-buttons-obs"></div>
+      <div class="info-text" id="projrange-text">Projected range data.</div>
+      <div class="button-row" id="projrange-panel-buttons"></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Habitat + Performance -->
+  <div class="row">
+    <div class="panel" id="habitat-panel">
+      <div class="panel-label">Habitat Associations</div>
+      <img id="habitat-img" src="" alt="Habitat chart">
+      <div class="info-text" id="habitat-text">Habitat charts appear here.</div>
+      <div class="button-row">
+        <button onclick="showHabitat('soil')">Soil</button>
+        <button onclick="showHabitat('climate')">Climate</button>
+        <button onclick="showHabitat('elevation')">Elevation</button>
+      </div>
+    </div>
+    <div class="panel" id="performance-panel">
+      <div class="panel-label">Model Performance</div>
+      <table id="perf-table">
+        <thead>
+          <tr><th>Metric</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>AUC</td><td>-</td></tr>
+          <tr><td>RMSE</td><td>-</td></tr>
+          <tr><td>Sensitivity</td><td>-</td></tr>
+          <tr><td>Specificity</td><td>-</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Taxonomic groups and species
+  //const speciesByGroup = {
+  //  "plants": ["Aralia nudicaulis", "Trillium erectum"],
+  //  "trees": ["Fagus grandifolia", "Fraxinus americana"]
+  //};
+
+
+
+  function getValue(key) {
+    const idx = opts.indexOf(key);
+    return idx !== -1 ? opts_value[idx] : null;
+  }
+
+  let data;
+
+  const opts = ["plain", "obs", "range", "obs + range"];
+  const opts_value = ["", "Obs", "Range", "ObsRange"];
+  let opt_map = opts[0];
+  let opt_range = opts[0];
+  let opt_projmap = opts[0];
+  let opt_projrange = opts[0];
+
+  let models;
+  let model_map = "brt";
+  let model_range = "brt";
+  let model_projmap = "brt";
+  let model_projrange = "brt";
+
+  let scenarios;
+
+  const groupSelect = document.getElementById("group");
+  const speciesSelect = document.getElementById("species");
+  const speciesImg = document.getElementById("species-img");
+  let currentSpecies = "";
+  let currentGroup = "";
+  let url = "https://object-arbutus.cloud.computecanada.ca/bq-io/explorer/";
+
+
+
+  Object.keys(speciesByGroup).forEach(g => {
+    const opt = document.createElement("option");
+    opt.value = g; opt.textContent = g;
+    groupSelect.appendChild(opt);
+  });
+
+  speciesByGroup[groupSelect.value].forEach(sp => {
+    const opt = document.createElement("option");
+    opt.value = sp; opt.textContent = sp;
+    speciesSelect.appendChild(opt);
+  });
+
+  groupSelect.addEventListener("change", () => {
+    const group = groupSelect.value;
+    speciesSelect.innerHTML = "";
+    speciesImg.src = "https://inaturalist-open-data.s3.amazonaws.com/photos/581423746/small.jpg";
+    if(speciesByGroup[group]){
+      speciesByGroup[group].forEach(sp => {
+        const opt = document.createElement("option");
+        opt.value = sp; opt.textContent = sp;
+        speciesSelect.appendChild(opt);
+      });
+    }
+  });
+
+  speciesSelect.addEventListener("change", () => {
+    currentSpecies = speciesSelect.value;
+    currentGroup = groupSelect.value;
+    updateAllPanels();
+  });
+
+  function updateAllPanels(){
+    //if(!currentSpecies || !data[currentSpecies]) return;
+    urlsp = url + currentSpecies.replace(" ", "_") + ".json";
+    fetch(urlsp)
+     .then(r => r.json())
+     .then(s => {
+        //console.log(data);
+        data = s;
+        //const s = data[currentGroup][currentSpecies];
+        // Update species image
+
+        models = Object.keys(s);
+        model_map = models[0];
+        model_range = models[0];
+        model_projmap = models[0];
+        model_projrange = models[0];
+
+        speciesImg.src = "https://inaturalist-open-data.s3.amazonaws.com/photos/581423746/small.jpg" || "";
+
+        // Top row
+        document.getElementById("map-img").src = url + s[model_map]["products"].find(item => item.product === 'sdm')["file"];
+        document.getElementById("map-text").textContent = "";
+        document.getElementById("range-img").src = url + s[model_range]["products"].find(item => item.product === 'range')["file"];
+        document.getElementById("range-text").textContent = "";
+
+        // Middle row
+        document.getElementById("projmap-img").src = url + s[model_map]["products"].find(item => item.product === 'sdm')["file"];
+        document.getElementById("projmap-text").textContent = "";
+        document.getElementById("projrange-img").src = url + s[model_range]["products"].find(item => item.product === 'range')["file"];
+        document.getElementById("projrange-text").textContent = "";
+
+        // Bottom row
+        document.getElementById("habitat-img").src = url + s[model_map]["products"].find(item => item.product === 'habitatAssociation')["file"];
+        document.getElementById("habitat-text").textContent = "";
+
+        const perfTable = document.getElementById("perf-table").getElementsByTagName("tbody")[0];
+        perfTable.innerHTML = "";
+        for(let key in s.performance){
+          const tr = document.createElement("tr");
+          const td1 = document.createElement("td"); td1.textContent = key;
+          const td2 = document.createElement("td"); td2.textContent = s.performance[key];
+          tr.appendChild(td1); tr.appendChild(td2);
+          perfTable.appendChild(tr);
+        }
+
+        // Map
+        const mapcontainer = document.getElementById("map-panel-buttons");
+        mapcontainer.innerHTML = "";
+        Object.keys(s).forEach(model => {
+          const btn = document.createElement("button");
+          btn.textContent = model//.toUpperCase();  // Button label (e.g., "BRT", "MAXENT")
+          btn.onclick = () => showModel(model);   // Pass the key to your function
+          mapcontainer.appendChild(btn);
+        });
+        const mapcontaineropt = document.getElementById("map-panel-buttons-obs");
+        mapcontaineropt.innerHTML = "";
+        opts.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.textContent = opt
+          btn.onclick = () => showModelOpt(opt);
+          mapcontaineropt.appendChild(btn);
+        });
+
+        // Range
+        const rangecontainer = document.getElementById("range-panel-buttons");
+        rangecontainer.innerHTML = "";
+        Object.keys(s).forEach(model => {
+          const btn = document.createElement("button");
+          btn.textContent = model//.toUpperCase();  // Button label (e.g., "BRT", "MAXENT")
+          btn.onclick = () => showRange(model);   // Pass the key to your function
+          rangecontainer.appendChild(btn);
+        });
+        const rangecontaineropt = document.getElementById("range-panel-buttons-obs");
+        rangecontaineropt.innerHTML = "";
+        opts.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.textContent = opt
+          btn.onclick = () => showRangeOpt(opt);
+          rangecontaineropt.appendChild(btn);
+        });
+
+        // Map
+        const projmapcontainer = document.getElementById("projmap-panel-buttons");
+        projmapcontainer.innerHTML = "";
+        Object.keys(s).forEach(model => {
+          const btn = document.createElement("button");
+          btn.textContent = model//.toUpperCase();  // Button label (e.g., "BRT", "MAXENT")
+          btn.onclick = () => showProjModel(model);   // Pass the key to your function
+          projmapcontainer.appendChild(btn);
+        });
+        const projmapcontaineropt = document.getElementById("projmap-panel-buttons-obs");
+        projmapcontaineropt.innerHTML = "";
+        opts.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.textContent = opt
+          btn.onclick = () => showProjModelOpt(opt);
+          projmapcontaineropt.appendChild(btn);
+        });
+
+        // Range
+        const projrangecontainer = document.getElementById("projrange-panel-buttons");
+        projrangecontainer.innerHTML = "";
+        Object.keys(s).forEach(model => {
+          const btn = document.createElement("button");
+          btn.textContent = model//.toUpperCase();  // Button label (e.g., "BRT", "MAXENT")
+          btn.onclick = () => showProjRange(model);   // Pass the key to your function
+          projrangecontainer.appendChild(btn);
+        });
+        const projrangecontaineropt = document.getElementById("projrange-panel-buttons-obs");
+        projrangecontaineropt.innerHTML = "";
+        opts.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.textContent = opt
+          btn.onclick = () => showProjRangeOpt(opt);
+          projrangecontaineropt.appendChild(btn);
+        });
+        changeButtons("map-panel-buttons", model_map);
+        changeButtons("map-panel-buttons-obs", opt_map);
+        changeButtons("range-panel-buttons", model_range);
+        changeButtons("range-panel-buttons-obs", opt_range);
+        changeButtons("projmap-panel-buttons", model_projmap);
+        changeButtons("projmap-panel-buttons-obs", opt_projmap);
+        changeButtons("projrange-panel-buttons", model_projrange);
+        changeButtons("projrange-panel-buttons-obs", opt_projrange);
+    });
+  }
+
+  // Buttons functions
+  function showModel(model){ if(!currentSpecies) return; document.getElementById("map-img").src = url + data[model]["products"].find(item => item.product === 'sdm' + getValue(opt_map))["file"]; document.getElementById("map-text").textContent = ""; model_map = model; changeButtons("map-panel-buttons", model_map);}
+
+  function showModelOpt(opt){ if(!currentSpecies) return; document.getElementById("map-img").src = url + data[model_map]["products"].find(item => item.product === 'sdm' + getValue(opt))["file"]; document.getElementById("map-text").textContent = ""; opt_map = opt; changeButtons("map-panel-buttons-obs", opt_map);}
+
+  function showRange(model){ if(!currentSpecies) return; document.getElementById("range-img").src = url + data[model]["products"].find(item => item.product === 'range' + getValue(opt_range))["file"]; document.getElementById("range-text").textContent = ""; model_range = model; changeButtons("range-panel-buttons", model_range);}
+
+  function showRangeOpt(opt){ if(!currentSpecies) return; document.getElementById("range-img").src = url + data[model_range]["products"].find(item => item.product === 'range' + getValue(opt))["file"]; document.getElementById("range-text").textContent = ""; opt_range = opt; changeButtons("range-panel-buttons-obs", opt_range);}
+
+  function showProjModel(model){ if(!currentSpecies) return; document.getElementById("projmap-img").src = url + data[model]["products"].find(item => item.product === 'sdm' + getValue(opt_projmap))["file"]; document.getElementById("projmap-text").textContent = ""; model_projmap = model; changeButtons("projmap-panel-buttons", model_projmap);}
+
+  function showProjModelOpt(opt){ if(!currentSpecies) return; document.getElementById("projmap-img").src = url + data[model_projmap]["products"].find(item => item.product === 'sdm' + getValue(opt))["file"]; document.getElementById("projmap-text").textContent = ""; opt_projmap = opt; changeButtons("projmap-panel-buttons-obs", opt_projmap);}
+
+  function showProjRange(model){ if(!currentSpecies) return; document.getElementById("projrange-img").src = url + data[model]["products"].find(item => item.product === 'range' + getValue(opt_projrange))["file"]; document.getElementById("projrange-text").textContent = ""; model_projrange = model; changeButtons("projrange-panel-buttons", model_projrange);}
+
+  function showProjRangeOpt(opt){ if(!currentSpecies) return; document.getElementById("projrange-img").src = url + data[model_projrange]["products"].find(item => item.product === 'range' + getValue(opt))["file"]; document.getElementById("projrange-text").textContent = ""; opt_projrange = opt; changeButtons("projrange-panel-buttons-obs", opt_projrange);}
+
+  function showHabitat(type){ if(!currentSpecies) return; document.getElementById("habitat-img").src = data.habitat[type]; document.getElementById("habitat-text").textContent = "";}
+
+  function capitalize(str){ return str.charAt(0).toUpperCase() + str.slice(1);}
+
+  //window.onload = function() {
+  //  updateAllPanels();
+  //};
+
+  function changeButtons(container, opt){
+    const bc = document.getElementById(container);
+    const buttons = bc.querySelectorAll("button");
+    buttons.forEach(btn => {
+    //console.log(btn.textContent);
+    if(btn.textContent === opt){
+      //btn.style.backgroundColor = "red"; // for example, green
+      btn.style.fontWeight = 600;
+      btn.style.color = "var(--green)";
+    } else {
+      //btn.style.backgroundColor = "green"; // for example, green
+      btn.style.fontWeight = 500;
+      btn.style.color = "var(--main-green)";
+    }
+    });
+  }
+
+</script>
+
+</body>
+</html>
