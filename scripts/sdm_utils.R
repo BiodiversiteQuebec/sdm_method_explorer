@@ -63,6 +63,9 @@ write_results<-function(file, product, ext){
   #x<-fread("results.csv")
   #setDT(res)
   res <- params
+  res$n_obs <- nrow(obs)
+  res$n_background <- nrow(bg)
+  res$time_elapsed <- round(as.numeric(difftime(Sys.time(), t1, units = "mins")), 2)
   f <- paste(file, product, sep = "_")
   res$product <- product
   res$ext <- ext
@@ -121,16 +124,6 @@ niche_overlap<-function(){
 checkpoint<-function(msg="Starting:"){
   message(paste(msg,paste0(params,collapse=" - "),"/",Sys.time(),"\n"))
 }
-
-get_repo_snapshot <- function(repo, user, tokenpath, n = 10){
-  token <- readLines(tokenpath)
-  githubapi <- paste0("https://", user, ":", token, "@api.github.com/repos/", repo, "/commits")
-  x <- fromJSON(paste0(githubapi,"?per_page=", n, "&files=false"))
-  latest_commit <- x$sha[1]
-  repo_snapshot <- file.path("https://github.com", repo, "tree", latest_commit)
-  repo_snapshot
-}
-
 
 get_ebirdst <- function(){
   eb <- ebirdst_runs |> as.data.table()

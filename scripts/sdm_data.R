@@ -41,7 +41,7 @@ background_atlas <- background_atlas |>
   as.data.frame() |>
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326) |>
   st_transform(epsg) |>
-  mutate(species = valid_scientific_name) |>
+  #mutate(species = valid_scientific_name) |>
   mutate(source = "atlas") |>
   mutate(coordinate_uncertainty = as.numeric(coordinate_uncertainty)) |>
   mutate(date = paste(year_obs, formatC(month_obs, width = 2, flag = 0), formatC(day_obs, width = 2, flag = 0), sep = "-"))
@@ -133,9 +133,9 @@ vars <- adjust_vars(vars_pool, params)
 
 presence <- c(rep(1, nrow(obs)), rep(0, nrow(bg)))
 n <- intersect(names(obs), names(bg))
-bg <- rbind(obs[, n], bg[, n])
+d <- rbind(obs[, n], bg[, n])
 
-d <- cbind(presence, bg)
+d <- cbind(presence, d)
 e <- terra::extract(unwrap(predictors[[vars]]), d, ID = FALSE)
 nas <- !apply(e, 1, function(i){any(is.na(i))})
 d <- cbind(d, e)

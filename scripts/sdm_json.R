@@ -10,7 +10,8 @@ files <- list.files(folder, pattern = "\\.json$", full.names = TRUE)
 x <- lapply(files, function(f) {
   z <- fromJSON(f, flatten = TRUE)
   if (is.list(z$vars)) z$vars <- unlist(z$vars)
-  if (is.null(z$I)) z$I <- NA
+  #if (is.list(z$performance)) z$performance <- unlist(z$performance)
+  #if (is.null(z$I)) z$I <- NA
   z
 })
 
@@ -46,6 +47,68 @@ for (entry in combined_models) {
   nested[[g]][[s]][[m]] <- entry
 }
 
-# Write final JSON
-write_json(nested, "combined_nested_models.json", pretty = TRUE, auto_unbox = TRUE)
+write_json(nested, "metadata.json", pretty = TRUE, auto_unbox = TRUE)
 
+
+
+#####################################################
+### Get group, species, models ######################
+x <- fromJSON("metadata.json", simplifyVector = FALSE)
+
+df <- do.call(rbind, lapply(names(x), function(group) {
+  do.call(rbind, lapply(names(x[[group]]), function(species) {
+    data.frame(
+      group = group,
+      species = species,
+      model = names(x[[group]][[species]])
+    )
+  }))
+}))
+df
+
+#####################################################
+### Get group, species, models ######################
+x <- fromJSON("metadata.json", simplifyVector = FALSE)
+
+df <- do.call(rbind, lapply(names(x), function(group) {
+  do.call(rbind, lapply(names(x[[group]]), function(species) {
+    data.frame(
+      group = group,
+      species = species,
+      model = names(x[[group]][[species]])
+    )
+  }))
+}))
+df
+
+l <- split(df, df$group) |>
+        lapply(function(i){unique(i$species)})
+
+write_json(l, "species.json", pretty = TRUE, auto_unbox = TRUE)
+rl <- readLines("species.json")
+rl[1] <- paste("speciesByGroup =", rl[1])
+rl[length(rl)] <- paste0(rl[length(rl)], ";")
+write(rl, "species.js")
+unlink("species.json")
+
+#####################################################
+### Split to species ################################
+x <- fromJSON("metadata.json", simplifyVector = FALSE)
+
+# Loop through groups → species
+for (group in names(x)) {
+  for (species in names(x[[group]])) {
+    
+    # Extract only the model-level content
+    species_data <- x[[group]][[species]]
+    
+    # Clean filename (replace spaces with underscores)
+    species_file <- paste0(
+      gsub(" ", "_", species),
+      ".json"
+    )
+    
+    # Write to file
+    write_json(species_data, file.path("json_species", species_file), pretty = TRUE, auto_unbox = TRUE)
+  }
+}

@@ -23,8 +23,8 @@ write_preds(preds)
 auc<-NA
 I<-niche_overlap()
 
-params$auc <- auc
-params$I <- I
-params$time <- Sys.time()
+params$performance <- list(auc = auc, I = I)
+
+params$production_date <- Sys.time()
 
 checkpoint("Done:")

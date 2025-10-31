@@ -5,7 +5,7 @@ background_placettes <- atlas |>
   filter(kingdom %in% c("Plantae")) |>
   rename(species = valid_scientific_name) |>
   collect() |>
-  (\(x) x[grepl("Placettes-échantillons|Points d'observation écologique|Relevés écologiques terrestres nordiques", x$dataset_name), ])() |>
+  #(\(x) x[grepl("Placettes-échantillons|Points d'observation écologique|Relevés écologiques terrestres nordiques", x$dataset_name), ])() |>
   #count(longitude, latitude) |> arrange(-n) |> nrow()
   #count(dataset_name)# |> _$n |> sum()#|>
   distinct(longitude, latitude, .keep_all = TRUE)
@@ -15,7 +15,7 @@ background_nonplacettes <- atlas |>
   filter(!dataset_name %in% c("Pl@ntNet automatically identified occurrences")) |>
   rename(species = valid_scientific_name) |>
   collect() |>
-  (\(x) x[!grepl("Placettes-échantillons|Points d'observation écologique|Relevés écologiques terrestres nordiques", x$dataset_name), ])()
+  #(\(x) x[!grepl("Placettes-échantillons|Points d'observation écologique|Relevés écologiques terrestres nordiques", x$dataset_name), ])()
 
 background_atlas <- rbind(background_placettes, background_nonplacettes) 
 

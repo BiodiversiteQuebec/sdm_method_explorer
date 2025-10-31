@@ -10,7 +10,7 @@ library(predicts)
 
 
 m <- MaxEnt(unwrap(predictors)[[vars]], 
-             vect(d[d$presence==1,]), vect(d[d$presence==0,]),
+             vect(d[d$presence == 1,]), vect(d[d$presence == 0,]),
              removeDuplicates=TRUE,
              silent=FALSE,
              #args=c("replicatetype=bootstrap","replicates=1","threads=4")
@@ -31,12 +31,12 @@ preds <- mask(predict(m, unwrap(predictors)[[vars]], args = c("outputformat=raw"
 
 write_preds(preds)
 
-auc<-unname(m@results[row.names(m@results)=="Training.AUC", 1])
-I<-niche_overlap()
+auc <- unname(m@results[row.names(m@results)=="Training.AUC", 1])
+I <- niche_overlap()
 
-params$auc <- auc
-params$I <- I
-params$time <- Sys.time()
+params$performance <- list(auc = auc, I = I)
+
+params$production_date <- Sys.time()
 
 checkpoint("Done:")
 

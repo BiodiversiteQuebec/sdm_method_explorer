@@ -5,7 +5,7 @@ library(dismo)
 library(lightgbm)
 
 dat$presence <- as.integer(as.character(dat$presence))
-dat2 <- dat[c(sample(which(dat$presence == 0), sum(dat$presence == 1) * 4), which(dat$presence == 1)), ]
+dat2 <- dat#[c(sample(which(dat$presence == 0), sum(dat$presence == 1) * 4), which(dat$presence == 1)), ]
 
 X <- data.matrix(dat2[ , -match(c("presence"), names(dat2))])
 Y <- dat2$presence
@@ -17,7 +17,7 @@ m <- lightgbm(
     max_depth = 4, # none4
     num_leaves = 5L, # 10L5
     learning_rate = 0.02, # 0.02
-    #is_unbalance = TRUE,
+    is_unbalance = TRUE,
     max_bin = 100,
     #bagging_fraction = 0.005,
     #max_bin = ,
@@ -43,12 +43,12 @@ preds <- mask(preds, region)
 
 write_preds(preds)
 
-auc<-mean(m$cv.roc)
-I<-niche_overlap()
+auc <- mean(m$cv.roc)
+I <- niche_overlap()
 
-params$auc <- auc
-params$I <- I
-params$time <- Sys.time()
+params$performance <- list(auc = auc, I = I)
+
+params$production_date <- Sys.time()
 
 checkpoint("Done:")
 

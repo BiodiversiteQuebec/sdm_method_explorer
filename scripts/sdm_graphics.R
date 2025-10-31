@@ -33,7 +33,7 @@ add_range <- function(){
        plot(st_geometry(aires[w, ]), border = adjustcolor("black", 0.25), lwd = 1.5, col = NA, add = TRUE) 
      }
    }   
-   plot(st_geometry(ran), col = adjustcolor("black", 0.10), border = NA, add = TRUE)
+   #plot(st_geometry(ran), col = adjustcolor("black", 0.10), border = NA, add = TRUE)
    #plot(st_geometry(b), col = NA, border = adjustcolor("black", 0.30), lty = 3, add = TRUE)
 }
 
@@ -108,6 +108,27 @@ points(st_geometry(obs), bg = adjustcolor("orange", 0.80), col = "black", pch = 
 #add_range()
 dev.off()
 
+filename <- write_results(basefilename, "rangeRange", "png")
+png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 300)
+par(mar = c(0, 0, 0, 0))
+plot(st_geometry(region), col = sdm_cols[1], border = NA)
+plot(ran, col = range_cols, border = NA, add = TRUE)
+plot(st_geometry(st_intersection(region, na)), lwd = 0.1, border = adjustcolor("black", 0.75), add = TRUE)
+plot(st_geometry(st_intersection(region, lakes)), col = "white", lwd = 0.1, border = adjustcolor("black", 0.5), add = TRUE)
+#points(st_geometry(obs), bg = adjustcolor("orange", 0.80), col = "black", pch = 21, cex = 0.3, lwd= 0.1)
+add_range()
+dev.off()
+
+filename <- write_results(basefilename, "rangeObsRange", "png")
+png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 300)
+par(mar = c(0, 0, 0, 0))
+plot(st_geometry(region), col = sdm_cols[1], border = NA)
+plot(ran, col = range_cols, border = NA, add = TRUE)
+plot(st_geometry(st_intersection(region, na)), lwd = 0.1, border = adjustcolor("black", 0.75), add = TRUE)
+plot(st_geometry(st_intersection(region, lakes)), col = "white", lwd = 0.1, border = adjustcolor("black", 0.5), add = TRUE)
+points(st_geometry(obs), bg = adjustcolor("orange", 0.80), col = "black", pch = 21, cex = 0.3, lwd= 0.1)
+add_range()
+dev.off()
 
 filename <- write_results(basefilename, "habitatAssociation", "png")
 h <- habitatAssociation(raster = ha, sdm = preds, n = 10000, col = TRUE)
@@ -118,13 +139,6 @@ ggsave(file.path("outputs/graphics", filename), plot = h$plot, width = 5, height
 #  lapply(fromJSON, flatten = TRUE)# |>
   #lapply(as.data.frame) |>
   #do.call("rbind", args = _)
-
-
-
-
-
-
-
 
 ################################################################
 ########## habitat associations ################################

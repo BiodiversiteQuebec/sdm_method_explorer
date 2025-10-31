@@ -14,9 +14,9 @@ message(paste("Running: inputs","/",Sys.time(),"\n"))
 
 data <- c("gbif", "ebird", "atlas")[1:3]
 
-group <- "plants"
+group <- "trees"
 period <- c("breeding", "yearround", "nonbreeding", "prebreeding", "postbreeding")[2]
-target_group <- c("plants")
+target_group <- c("trees")
 
 #vars_pool<-c("conifers", "taiga", "deciduous", "mixed", "temperate_shrubland", "temperate_grassland", "polar_shrubland", "polar_grassland", "polar_barren", "wetland", "cropland", "barren", "urban", "water", "snow", "distfsl", "tmean", "prec", "geomflat", "elevation", "distroads", "sand")
 #vars_pool <- vars_pool[c(1, 4, 17)]
@@ -24,20 +24,19 @@ target_group <- c("plants")
 rerun <- TRUE
 
 years <- list( # year wanted or a vector of years, has to be a range for gbif data
-  2000:2025
+  1800:2025
 )
 
 ### minimal coordinate precision
 th <- 2500 
 th_small <- th # for local scale model if any
 
-
 ### Modeling ##################################################################
 
 models_all <- c("ewlgcpSDM","randomForest","brt","maxent")
 algorithms_all <- c("ewlgcpSDM","randomForest","brt","maxent")
 
-models <- models_all[c(2)]
+models <- models_all[c(3)]
 bias<-c("Bias","noBias")[1]
 usepredictors<-c("Predictors","noPredictors")[1]
 spatial<-c("Spatial","noSpatial")[2]
@@ -75,30 +74,25 @@ aires <- st_read("data/aires_repartition_pffq.gpkg") |>
     "Osmunda regalis" ~ "Osmunda spectabilis",
     "Matteuccia struthiopteris" ~ "Matteuccia pensylvanica",
     .default = species))
-species <- unique(aires$species)
+#species <- unique(aires$species)
 
 #aires <- st_read("data/aires_repartition_pffq.gpkg") 
 #r <- rast(ext = ext(aires), resolution = 10000)
 #r <- rasterize(aires, r, fun = "count", background = 0)
 
 
-
-
-
-
 vascan <- read.csv("data/vascan.txt", sep = "\t")
-vascan <- vascan[vascan$Rank == "Species", ]
-#plants <- vascan$Scientific.name[!grepl("Tree", vascan$Habit)]
-plants <- vascan$Scientific.name
-
-#species <- species[!species %in% plants] # Just keep what is not a tree in VASCAN
+vascan <- vascan[vascan$Rank == "Species" & vascan$Quebec %in% c("Native", "Introduced", "Ephemeral"), ]
+vascan <- vascan[grepl("Tree", vascan$Habit), ]
+species <- vascan$Scientific.name
 
 #species <- sample(species_info$species[species_info$group %in% "birds"], 300)
 #species <- sample(species_info$species[species_info$group %in% "trees"], 2)
 #species <- c("Aralia hispida", "Solidago rugosa")
-species <- c("Trillium erectum", "Vitis riparia", "Allium tricoccum", "Medeola virginiana", "Uvularia sessilifolia", "Oclemena acuminata", "Polystichum braunii", "Veratrum viride", "Solidago macrophylla", "Ageratina altissima", "Viola labradorica") #
+#species <- c("Trillium erectum", "Vitis riparia", "Allium tricoccum", "Medeola virginiana", "Uvularia sessilifolia", "Oclemena acuminata", "Polystichum braunii", "Veratrum viride", "Solidago macrophylla", "Ageratina altissima", "Viola labradorica") #
 #species <- c("Viola labradorica")
 set.seed(1234)
+#species <- sample(species,10)
 #species <- c("Trillium erectum", "Aralia nudicaulis")
 #species <- sample(species, 40)
 #species <- NULL # leave NULL if all species should be used
@@ -146,7 +140,7 @@ ebird <- duckdbfs::open_dataset("data/ebd_relJan-2025.parquet")
 
 
 species_info <- atlas |>
-  filter(kingdom %in% c("Plantae", "Fungi")) |>
+  filter(phylum %in% c("Tracheophyta")) |>
   mutate(taxon = tolower(group_en)) |>
   mutate(start = "01-01") |>
   mutate(end = "12-31") |>
@@ -190,7 +184,6 @@ species_info$vars <- lapply(species_info$vars, function(i){
     add
   }
 })
-
 
 breeding_periods <- lapply(1:nrow(species_info), function(i){
   c(species_info$start[i], species_info$end[i])
@@ -274,8 +267,6 @@ if(!rerun){
 }
 
 results <- merge(results, species_info)
-
-
 
 #library(jsonlite)
 #new <- toJSON(results)

@@ -86,6 +86,7 @@ species <- species[species %in% trees] # Just keep what is not a tree in VASCAN
 #species <- c("Picea mariana", "Clintonia borealis") #
 #species <- species[1:10]#
 #species <- NULL # leave NULL if all species should be used
+species <- c("Fraxinus americana", "Fagus grandifolia") #
 print(species)
 
 ############################################################################################

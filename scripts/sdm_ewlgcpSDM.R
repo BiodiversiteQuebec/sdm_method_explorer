@@ -46,7 +46,7 @@ if(any(params$algorithm == "ewlgcpSDM")){
 
 ### Summarize observations and effort
 buff <- st_buffer(obs, effort_buffer_radius) |> st_union()
-dmesh <- dmesh_effort(dmesh, obs = d[d$presence == 1, ], background =d[d$presence %in% c(0, 1), ], buffer = buff, adjust = FALSE)
+dmesh <- dmesh_effort(dmesh, obs = d[d$presence == 1, ], background = d[d$presence %in% c(0, 1), ], buffer = buff, adjust = FALSE)
 
 if(params$usepredictors == "Predictors"){
   subvars <- c("conifers", "taiga", "deciduous", "temperate_grassland", "wetland", "cropland", "urban", "water", "distfsl", "tmean", "geomflat", "elevation", "sand")
@@ -112,9 +112,9 @@ write_preds(preds)
 auc<-NA
 I<-niche_overlap()
 
-params$auc <- auc
-params$I <- I
-params$time <- Sys.time()
+params$performance <- list(auc = auc, I = I)
+
+params$production_date <- Sys.time()
 
 checkpoint("Done:")
 
