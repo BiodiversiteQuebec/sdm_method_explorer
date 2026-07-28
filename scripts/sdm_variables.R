@@ -1,5 +1,8 @@
 
 remove <- c("twi", "mhc", "eau_peu_profonde", "marais", "marecage", "indifferencie", "prairie_humide", "tourbiere_boisee", "tourbiere_indifferenciee", "tourbiere_minerotrophe", "tourbiere_ombrotrophe", "marin", "snow", "eolien") # partial cover of QC
+
+remove <- c(remove, "distance_to_roads")
+
 keep <- c("alluvion", "annual_precipitation_amount", "annual_range_of_air_temperature", 
 "anthropogenique", "barren", "bulk_density", "clay", "coniferous", 
 "cropland", "deciduous", "depot", "distance_to_roads", 
@@ -30,11 +33,14 @@ vars_pool <- setdiff(names(predictors), remove)
 vars_pool <- vars_pool[vars_pool %in% keep]
 
 
-filter_vars <- function(vars, data, th = 3){
+filter_vars <- function(vars, data, th = 5){
     v <- vars
     vifs <- car::vif(lm(y ~ ., data = cbind(y = 1, data[ , v])))
     while(any(vifs >= th)){
-      v <- v[!v %in% names(vifs)[which.max(vifs)]]
+      rem <- names(vifs)[which.max(vifs)]
+      sprintf("Removing %s", rem)
+      print(rem)
+      v <- v[!v %in% rem]
       vifs <- car::vif(lm(y ~ ., data = cbind(y = 1, data[ , v])))
     }
     v

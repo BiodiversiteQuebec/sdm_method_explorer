@@ -27,13 +27,13 @@ library(dplyr)
 library(sdmtools)
 
 i <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID"))
-i <- 1
+#i <- 4
 
 args <- commandArgs(trailingOnly=TRUE)
 print(args[2])
 #args <- c("bq_invascular.R", "commit")
 #args <- "ebv_pffq_trees.R"
-args <- "bq_invascular.R"
+#args <- "bq_trees.R"
 
 source("scripts/sdm_utils.R")
 
@@ -53,6 +53,7 @@ if(!dir.exists("data")){
 source("scripts/sdm_prelim.R")
 source("scripts/sdm_predictors.R")
 source("scripts/sdm_variables.R")
+source("scripts/sdm_params.R")
 
 job <- gsub("\\.R|\\.r", "", args[1])
 source(file.path("scripts/jobs", args[1]))
@@ -61,6 +62,7 @@ sprintf("Species: %s", results$species[i])
 #sp <- species
 
 results$reposnapshot <- args[2]
+results$label <- args[3]
 
 #nworkers<-min(c(length(runs), 3))
 #options(mc.cores=nworkers)
@@ -94,16 +96,19 @@ if(nrow(obs) < 5){
 }
 
 switch(params$algorithm,
-        maxent={
+        maxent = {
           source("scripts/sdm_maxent_predicts.R")
         },
-        randomForest={
+        randomForest = {
           source("scripts/sdm_randomforest.R")
         },
-        brt={
+        brt = {
           source("scripts/sdm_brt.R")
         },
-        ewlgcpSDM={
+        gbm = {
+          source("scripts/sdm_gbm.R")
+        },        
+        ewlgcpSDM = {
           source("scripts/sdm_ewlgcpSDM.R")
         }        
 )

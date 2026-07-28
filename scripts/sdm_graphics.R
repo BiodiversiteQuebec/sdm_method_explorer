@@ -30,7 +30,7 @@ add_range <- function(){
    if(exists("aires")){
      w <- which(aires$species == sp)
      if(any(w)){
-       plot(st_geometry(aires[w, ]), border = adjustcolor("black", 0.25), lwd = 1.5, col = NA, add = TRUE) 
+       plot(st_geometry(aires[w, ]), border = adjustcolor("black", 0.5), lwd = 1.5, col = NA, add = TRUE) 
      }
    }   
    #plot(st_geometry(ran), col = adjustcolor("black", 0.10), border = NA, add = TRUE)
@@ -51,7 +51,7 @@ basefilename <- paste(params$group, gsub(" ","_",params$species), params$model, 
 write_results(basefilename, "model", "json")
 
 filename <- write_results(basefilename, "sdm", "png")
-png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 300)
+png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 200)
 plot(preds, axes = FALSE, add = FALSE, plg = plg, col = sdm_cols, mar = c(0.5, 0.5, 0.5, 0.5))
 plot(st_geometry(st_intersection(region, na)), lwd = 0.1, border = adjustcolor("black", 0.75), add = TRUE)
 plot(st_geometry(lakes), col = "white", lwd = 0.1, border = adjustcolor("black", 0.5), add = TRUE)
@@ -60,16 +60,16 @@ plot(st_geometry(lakes), col = "white", lwd = 0.1, border = adjustcolor("black",
 dev.off()
 
 filename <- write_results(basefilename, "sdmObs", "png")
-png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 300)
+png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 200)
 plot(preds, axes = FALSE, add = FALSE, plg = plg, col = sdm_cols, mar = c(0.5, 0.5, 0.5, 0.5))
 plot(st_geometry(st_intersection(region, na)), lwd = 0.1, border = adjustcolor("black", 0.75), add = TRUE)
 plot(st_geometry(lakes), col = "white", lwd = 0.1, border = adjustcolor("black", 0.5), add = TRUE)
-points(st_geometry(obs), bg = adjustcolor("orange", 0.80), col = "black", pch = 21, cex = 0.3, lwd= 0.1)
+points(st_geometry(obs), bg = adjustcolor("orange", 0.80), col = "black", pch = 21, cex = 0.5, lwd= 0.1)
 #add_range()
 dev.off()
 
 filename <- write_results(basefilename, "sdmRange", "png")
-png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 300)
+png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 200)
 plot(preds, axes = FALSE, add = FALSE, plg = plg, col = sdm_cols, mar = c(0.5, 0.5, 0.5, 0.5))
 plot(st_geometry(st_intersection(region, na)), lwd = 0.1, border = adjustcolor("black", 0.75), add = TRUE)
 plot(st_geometry(lakes), col = "white", lwd = 0.1, border = adjustcolor("black", 0.5), add = TRUE)
@@ -78,16 +78,16 @@ add_range()
 dev.off()
 
 filename <- write_results(basefilename, "sdmObsRange", "png")
-png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 300)
+png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 200)
 plot(preds, axes = FALSE, add = FALSE, plg = plg, col = sdm_cols, mar = c(0.5, 0.5, 0.5, 0.5))
 plot(st_geometry(st_intersection(region, na)), lwd = 0.1, border = adjustcolor("black", 0.75), add = TRUE)
 plot(st_geometry(lakes), col = "white", lwd = 0.1, border = adjustcolor("black", 0.5), add = TRUE)
-points(st_geometry(obs), bg = adjustcolor("orange", 0.80), col = "black", pch = 21, cex = 0.3, lwd= 0.1)
+points(st_geometry(obs), bg = adjustcolor("orange", 0.80), col = "black", pch = 21, cex = 0.5, lwd= 0.1)
 add_range()
 dev.off()
 
 filename <- write_results(basefilename, "range", "png")
-png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 300)
+png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 200)
 par(mar = c(0, 0, 0, 0))
 plot(st_geometry(region), col = sdm_cols[1], border = NA)
 plot(ran, col = range_cols, border = NA, add = TRUE)
@@ -98,18 +98,18 @@ plot(st_geometry(st_intersection(region, lakes)), col = "white", lwd = 0.1, bord
 dev.off()
 
 filename <- write_results(basefilename, "rangeObs", "png")
-png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 300)
+png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 200)
 par(mar = c(0, 0, 0, 0))
 plot(st_geometry(region), col = sdm_cols[1], border = NA)
 plot(ran, col = range_cols, border = NA, add = TRUE)
 plot(st_geometry(st_intersection(region, na)), lwd = 0.1, border = adjustcolor("black", 0.75), add = TRUE)
 plot(st_geometry(st_intersection(region, lakes)), col = "white", lwd = 0.1, border = adjustcolor("black", 0.5), add = TRUE)
-points(st_geometry(obs), bg = adjustcolor("orange", 0.80), col = "black", pch = 21, cex = 0.3, lwd= 0.1)
+points(st_geometry(obs), bg = adjustcolor("orange", 0.80), col = "black", pch = 21, cex = 0.5, lwd= 0.1)
 #add_range()
 dev.off()
 
 filename <- write_results(basefilename, "rangeRange", "png")
-png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 300)
+png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 200)
 par(mar = c(0, 0, 0, 0))
 plot(st_geometry(region), col = sdm_cols[1], border = NA)
 plot(ran, col = range_cols, border = NA, add = TRUE)
@@ -120,19 +120,31 @@ add_range()
 dev.off()
 
 filename <- write_results(basefilename, "rangeObsRange", "png")
-png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 300)
+png(file.path("outputs/graphics", filename), units = "in", height = 6, width = 5, res = 200)
 par(mar = c(0, 0, 0, 0))
 plot(st_geometry(region), col = sdm_cols[1], border = NA)
 plot(ran, col = range_cols, border = NA, add = TRUE)
 plot(st_geometry(st_intersection(region, na)), lwd = 0.1, border = adjustcolor("black", 0.75), add = TRUE)
 plot(st_geometry(st_intersection(region, lakes)), col = "white", lwd = 0.1, border = adjustcolor("black", 0.5), add = TRUE)
-points(st_geometry(obs), bg = adjustcolor("orange", 0.80), col = "black", pch = 21, cex = 0.3, lwd= 0.1)
+points(st_geometry(obs), bg = adjustcolor("orange", 0.80), col = "black", pch = 21, cex = 0.5, lwd= 0.1)
 add_range()
 dev.off()
 
 filename <- write_results(basefilename, "habitatAssociation", "png")
 h <- habitatAssociation(raster = ha, sdm = preds, n = 10000, col = TRUE)
-ggsave(file.path("outputs/graphics", filename), plot = h$plot, width = 5, height = 6, dpi = 300)
+ggsave(file.path("outputs/graphics", filename), plot = h$plot, width = 5, height = 6, dpi = 200)
+
+
+
+if(FALSE){
+  ppp <- rast(ext(predictors), resolution = 25000, crs = crs(predictors))
+  eo <- rasterize(obs, ppp, fun = "count", background = 0)# |> values()
+  eb <- rasterize(bg, ppp, fun = "count", background = 0)# |> values()
+  png("raw.png", width = 9, height = 9, units = "in", res = 300)
+  plot(eo / eb)
+  plot(st_geometry(na), add = TRUE)
+  dev.off()
+}
 
 
 #x <- list.files("json", full = TRUE) |>
@@ -230,6 +242,10 @@ image_write(image_append(image_scale(im, "x1500")), "magick.png")
 
 
 }
+
+
+
+
 
 
 

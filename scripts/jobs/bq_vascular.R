@@ -27,32 +27,16 @@ years <- list( # year wanted or a vector of years, has to be a range for gbif da
   1800:2025
 )
 
-### minimal coordinate precision
-th <- 2500 
-th_small <- th # for local scale model if any
-
 ### Modeling ##################################################################
 
-models_all <- c("ewlgcpSDM","randomForest","brt","maxent")
-algorithms_all <- c("ewlgcpSDM","randomForest","brt","maxent")
+models_all <- c("ewlgcpSDM","randomForest","brt", "gbm", "maxent")
+algorithms_all <- c("ewlgcpSDM","randomForest","brt", "gbm","maxent")
 
-models <- models_all[c(3)]
+models <- models_all[c(2:3, 5)]
 bias<-c("Bias","noBias")[1]
 usepredictors<-c("Predictors","noPredictors")[1]
 spatial<-c("Spatial","noSpatial")[2]
 
-### background parameters
-background_prop <- 0.9 # targeted proportion of background points for the model 
-background_cap <- TRUE # if TRUE, will cap the nb of background points with the min/max 
-#background_n <- 10000 # number of background points
-background_min <- 5000 # overall min nb of background points
-background_max <- 10000000 # overall max nb of background points
-
-add_effort_buffer <- TRUE # add an effort buffer or not
-effort_buffer_radius <- 250000 # in meters
-effort_buffer_n <- 400000 # number of observations in the outside buffer
-
-dmesh_resolution <- 0.002
 
 ### Variables ###################################################################
 
@@ -96,7 +80,7 @@ set.seed(1234)
 #species <- c("Trillium erectum", "Aralia nudicaulis")
 #species <- sample(species, 40)
 #species <- NULL # leave NULL if all species should be used
-print(species)
+#print(species)
 
 ############################################################################################
 ############################################################################################
@@ -266,9 +250,13 @@ if(!rerun){
 
 }
 
+set.seed(1234)
 results <- merge(results, species_info)
-
-
+#species <- unique(c("Elymus hystrix", "Trillium erectum", "Clintonia borealis", "Cypripedium acaule", "Cornus canadensis", "Tussilago farfara", "Veratrum viride", "Erythronium americanum", "Rhododendron groenlandicum", sample(unique(results$species), 50)))
+species <- intersect(results$species, aires$species)#[1] # 651
+#results <- results[results$species %in% sample(unique(results$species), 10), ]
+results <- results[results$species %in% species, ] # 651
+as.data.table(results) # just to print head and tail
 
 #library(jsonlite)
 #new <- toJSON(results)
@@ -284,8 +272,24 @@ results <- merge(results, species_info)
 #}
 
 
+if(FALSE){
 
+citizen <- c("iNaturalist Research-grade Observations", "Atlas des Oiseaux Nicheurs du Québec", "Pl@ntNet automatically identified occurrences", "Pl@ntNet observations", "Monarch Watch", "Xeno-canto - Bird sounds from around the world", "Observation.org, Nature data from around the World", "Breeding birds survey North America", "Great Backyard Bird Count", "eButterfly Surveys")
 
+#citizen <- c("iNaturalist Research-grade Observations")
 
+ebird <- c("EOD – eBird Observation Dataset", citizen)
 
+x <- duckdbfs::open_dataset("data/atlas_2026-05-04.parquet", tblname = "atlas") |>
+  count(dataset_name) |>
+  mutate(cit= dataset_name %in% citizen) |>
+  mutate(eb = dataset_name %in% ebird) |>
+  mutate(pour_citizen = sum(n[cit]) / sum(n[!eb])) |>
+  mutate(pour_ebird = sum(n[eb]) / sum(n)) |>
+  arrange(-n) |>
+  collect() |>
+  as.data.table()
 
+x
+
+}

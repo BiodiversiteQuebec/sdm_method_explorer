@@ -9,7 +9,7 @@ library(ewlgcpSDM)
 #predictors <- rast("data/predictors_500_QC.tif")
 #predictors <- rast("data/predictors_100_QC.tif")
 predictors <- rast("data/predictors_200_QC.tif")
-predictors <- resample(predictors, rast(ext(st_buffer(region, 25000)), resolution = 1000), method = "average")
+predictors <- resample(predictors, rast(ext(st_buffer(region, 25000)), resolution = 2000), method = "average")
 #writeRaster(p, "data/predictors_200_QC.tif", overwrite = TRUE)
 #predictors <- aggregate(predictors, 2, na.rm = TRUE)
 #predictors <- predictors[[vars_pool]]
@@ -71,4 +71,19 @@ if(FALSE){
     png("predictors.png", width = 12, height = 10, units = "in", res = 300)
     plot(predictors, mar = c(0, 0, 1, 0), axes = FALSE)
     dev.off()
+
+
+    vars <- c("elevation", "coniferous", "geomflat", "water", "mean_annual_air_temperature", "annual_precipitation_amount")
+    name <- c("Élévation", "Forêt coniférienne", "Relief", "Eau", "Température annuelle", "Précipitation")
+    pal <- list(terrain.colors(200), rev(map.pal("grass", n = 200)), map.pal("magma", n = 200), map.pal("blues", n = 200), map.pal("plasma", n = 200), map.pal("water", n = 200))
+    png("predictors.png", width = 6, height = 6, units = "in", res = 300)
+    par(mfrow = c(2, 3))
+
+    lapply(seq_along(vars), function(i){
+      plot(terra::crop(predictors[[vars[i]]], qc, mask = TRUE), mar = c(0, 0, 1, 0), main = name[i], axes = FALSE, legend = FALSE, col = pal[[i]])
+    }) |> invisible()
+    
+    dev.off()
+
+
 }

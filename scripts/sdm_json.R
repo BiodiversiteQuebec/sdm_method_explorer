@@ -50,22 +50,6 @@ for (entry in combined_models) {
 write_json(nested, "metadata.json", pretty = TRUE, auto_unbox = TRUE)
 
 
-
-#####################################################
-### Get group, species, models ######################
-x <- fromJSON("metadata.json", simplifyVector = FALSE)
-
-df <- do.call(rbind, lapply(names(x), function(group) {
-  do.call(rbind, lapply(names(x[[group]]), function(species) {
-    data.frame(
-      group = group,
-      species = species,
-      model = names(x[[group]][[species]])
-    )
-  }))
-}))
-df
-
 #####################################################
 ### Get group, species, models ######################
 x <- fromJSON("metadata.json", simplifyVector = FALSE)
@@ -112,3 +96,17 @@ for (group in names(x)) {
     write_json(species_data, file.path("json_species", species_file), pretty = TRUE, auto_unbox = TRUE)
   }
 }
+
+# ~/s5cmd rm s3://bq-io/explorer/*
+
+# ~/s5cmd --numworkers 8 cp -acl public-read --sp '/home/frousseu/links/projects/rpp-gonzalez/frousseu/sdm_method_explorer/species.js' s3://bq-io/explorer/
+
+# ~/s5cmd --numworkers 8 cp -acl public-read --sp '/home/frousseu/links/projects/rpp-gonzalez/frousseu/sdm_method_explorer/json_species/*' s3://bq-io/explorer/
+
+# ~/s5cmd --numworkers 8 cp -acl public-read --sp '/home/frousseu/links/projects/rpp-gonzalez/frousseu/sdm_method_explorer/outputs/graphics/*' s3://bq-io/explorer/
+
+# progress version
+# total=$(ls outputs/graphics/*.png | wc -l); i=0; for f in outputs/graphics/*.png; do i=$((i+1)); printf "\r[%d/%d] %-60s" "$i" "$total" "$f"; magick "$f" +dither -colors 100 "$f"; done; echo
+
+# no progress
+# for f in outputs/graphics/*.png; do magick "$f" +dither -colors 100 "$f"; done

@@ -80,8 +80,13 @@ background <- background[region, ]
 #obs <- obs[nab, ]
 #background <- background[nab, ]
 
-obs <- obs[which(obs$coordinate_uncertainty <= th | is.na(obs$coordinate_uncertainty)), ]
-background <- background[which(background$coordinate_uncertainty <= th | is.na(background$coordinate_uncertainty)), ]
+if(keep_na){
+  obs <- obs[which(obs$coordinate_uncertainty <= th | is.na(obs$coordinate_uncertainty)), ]
+  background <- background[which(background$coordinate_uncertainty <= th | is.na(background$coordinate_uncertainty)), ]
+} else {
+  obs <- obs[which(obs$coordinate_uncertainty <= th), ]
+  background <- background[which(background$coordinate_uncertainty <= th), ]
+}
 
 if(species_target_groups[[sp]] == "birds"){
   obs <- obs[obs$source %in% "ebird", ]
@@ -150,12 +155,22 @@ dat <- st_drop_geometry(d)
 dat <- dat[, c("presence", vars)]
 
 if(FALSE){
+
 png("points.png", width = 12, height = 10, units = "in", res = 300)
 plot(st_geometry(qc))
 plot(st_geometry(region), add = TRUE)
 plot(st_geometry(d), axes = FALSE, add = TRUE)
 plot(st_geometry(d[!nas, ]), col = "red", add = TRUE)
 dev.off()
+
+png("points.png", width = 12, height = 10, units = "in", res = 300)
+plot(st_geometry(qc))
+plot(st_geometry(region), add = TRUE)
+#plot(st_geometry(bg), col = "black", add = TRUE)
+plot(st_geometry(bg[sample(1:nrow(bg), 50 * nrow(obs)), ]), col = "black", add = TRUE)
+plot(st_geometry(obs), col = "red", axes = FALSE, add = TRUE)
+dev.off()
+
 }
 
 

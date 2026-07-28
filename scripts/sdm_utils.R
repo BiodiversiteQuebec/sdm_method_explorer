@@ -65,6 +65,8 @@ write_results<-function(file, product, ext){
   res <- params
   res$n_obs <- nrow(obs)
   res$n_background <- nrow(bg)
+  res$minimal_coordinate_precision <- th
+  res$na_coordinate_precision <- round(sum(is.na(obs$coordinate_uncertainty)) / nrow(obs), 3)
   res$time_elapsed <- round(as.numeric(difftime(Sys.time(), t1, units = "mins")), 2)
   f <- paste(file, product, sep = "_")
   res$product <- product
@@ -83,13 +85,13 @@ write_results<-function(file, product, ext){
 
 add_results <- function(){
   lf <- list.files("json", full = TRUE)
-  x <- lapply(lf, fromJSON) |>
+  x <- lapply(lf, fromJSON) |> lapply(as.data.frame) |>
     rbindlist(fill = TRUE)
   if(file.exists("results.json")){
     old <- fromJSON("results.json")
     x <- rbindlist(list(x, old), fill = TRUE)
   }
-  x <- x[rev(order(time)), ]
+  x <- x[rev(order(production_date)), ]
   #fwrite(x, "results.csv", append = FALSE)
   write_json(x, "results.json")
   #print(x)
@@ -156,3 +158,14 @@ get_period <- function(x){
   }
   x[substr(x$date, 6, 10) %in% dates, ]
 }
+
+
+get_params <- function(){
+  lapply(ls(envir = .GlobalEnv), function(i){
+    x <- get(i)
+    if(class(x) %in% c("", "", "") & length(i) == 1)
+    c(i, class(x), length(x))
+  })
+}
+
+# get_params()

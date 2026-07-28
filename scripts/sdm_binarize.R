@@ -10,7 +10,7 @@ rangewidth <- sqrt(abs(bbox$ymax - bbox$ymin)*abs(bbox$ymax - bbox$ymin) + abs(b
 threshold <- 0.85
 
 bufferdist <- rangewidth #20000
-rangedist <- rangewidth #50000
+rangedist <- rangewidth * 3 #50000
 e <- extract(preds, obs)
 e <- e[rev(order(e[,2])), ]
 val <- e[round(threshold * nrow(e)), 2]

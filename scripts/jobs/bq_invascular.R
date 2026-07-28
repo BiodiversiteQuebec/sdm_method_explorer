@@ -27,32 +27,17 @@ years <- list( # year wanted or a vector of years, has to be a range for gbif da
   1800:2025
 )
 
-### minimal coordinate precision
-th <- 2500 
-th_small <- th # for local scale model if any
-
 ### Modeling ##################################################################
 
-models_all <- c("ewlgcpSDM","randomForest","brt","maxent")
-algorithms_all <- c("ewlgcpSDM","randomForest","brt","maxent")
+models_all <- c("ewlgcpSDM","randomForest","brt", "gbm","maxent")
+algorithms_all <- c("ewlgcpSDM","randomForest","brt", "gbm","maxent")
 
-models <- models_all[c(2:4)]
+models <- models_all[c(3:4)]
 bias<-c("Bias","noBias")[1]
 usepredictors<-c("Predictors","noPredictors")[1]
 spatial<-c("Spatial","noSpatial")[2]
 
-### background parameters
-background_prop <- 0.9 # targeted proportion of background points for the model 
-background_cap <- TRUE # if TRUE, will cap the nb of background points with the min/max 
-#background_n <- 10000 # number of background points
-background_min <- 5000 # overall min nb of background points
-background_max <- 10000000 # overall max nb of background points
 
-add_effort_buffer <- TRUE # add an effort buffer or not
-effort_buffer_radius <- 250000 # in meters
-effort_buffer_n <- 400000 # number of observations in the outside buffer
-
-dmesh_resolution <- 0.002
 
 ### Variables ###################################################################
 
@@ -271,8 +256,11 @@ if(!rerun){
 results <- merge(results, species_info)
 
 species <- c("Hylocomium splendens", "Ptilium crista-castrensis")
-results <- results[results$species %in% species, ]
-
+#results <- results[results$species %in% species, ]
+species <- intersect(results$species, aires$species) # 651
+#results <- results[results$species %in% sample(unique(results$species), 10), ]
+results <- results[results$species %in% species, ] # 651
+as.data.table(results) # just to print head and tail
 
 
 #library(jsonlite)
