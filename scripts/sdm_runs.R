@@ -38,13 +38,23 @@ print(args[2])
 source("scripts/sdm_utils.R")
 
 if(!dir.exists("outputs")){
-  dir.create("outputs")
+  dir.create("outputs") # with  inside
+}
+
+for(fo in c("graphics", "polygons", "ranges", "rasters")){
+  p <- file.path("outputs", fo)
+  if(!dir.exists(p)){
+    dir.create(p) # with  inside
+  }
 }
 
 if(!dir.exists("json")){
   dir.create("json")
 }
-#clean_results()
+
+if(!dir.exists("json_species")){
+  dir.create("json_species")
+}
 
 if(!dir.exists("data")){
   stop("Missing data folder")

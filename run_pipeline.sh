@@ -7,7 +7,7 @@ module load StdEnv/2023 gcc/12.3 r/4.5.0 geos/3.12.0 gdal/3.9.1 udunits/2.2.28 g
 REPO=$(Rscript scripts/sdm_repo.R)
 echo "REPO: $REPO"
 
-LABEL="Testing for the new label"
+LABEL="This is an example label"
 echo "LABEL: $LABEL"
 
 # Step 2: submit job with env var
