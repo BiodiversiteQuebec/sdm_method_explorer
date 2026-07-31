@@ -31,7 +31,7 @@ i <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID"))
 
 args <- commandArgs(trailingOnly=TRUE)
 print(args[2])
-#args <- c("bq_invascular.R", "commit")
+#args <- c("bq_vascular.R", "commit", "test label")
 #args <- "ebv_pffq_trees.R"
 #args <- "bq_trees.R"
 
