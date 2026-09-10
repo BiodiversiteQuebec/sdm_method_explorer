@@ -45,8 +45,7 @@
 
 background_poe <- atlas |> 
   filter(phylum %in% c("Tracheophyta")) |>
-  filter(dataset_name %in% c("Points d'observation écologique")) |>
-  mutate(coordinate_uncertainty = if_else(dataset_name %in% c("Points d'observation écologique"), "10", coordinate_uncertainty)) |> # assign high 
+  filter(dataset_name %in% c("Points d'observation écologique")) |> 
   distinct(longitude, latitude, .keep_all = TRUE) |>
   rename(species = valid_scientific_name) |>
   collect() |>
@@ -66,7 +65,6 @@ background_nonpoe <- atlas |>
 background_atlas <- atlas |> 
   filter(phylum %in% c("Tracheophyta")) |>
   filter(!dataset_name %in% c("Pl@ntNet automatically identified occurrences")) |>
-  mutate(coordinate_uncertainty = if_else(dataset_name %in% c("Points d'observation écologique"), "10", coordinate_uncertainty)) |> # assign high precision to POE
   #filter(!dataset_name %in% c("Points d'observation écologique")) |>
   #filter(!dataset_name %in% c("Relevés écologiques terrestres nordiques")) |>
   #filter(!dataset_name %in% c("Réseau de suivi de la biodiversité du Québec")) |>
@@ -112,7 +110,6 @@ background_gbif <- gbif |>
 obs_atlas <- atlas |> 
   filter(genus == !!genus) |> 
   filter(!dataset_name %in% c("Pl@ntNet automatically identified occurrences")) |>
-  mutate(coordinate_uncertainty = if_else(dataset_name %in% c("Points d'observation écologique"), "10", coordinate_uncertainty)) |> # assign high 
   #filter(!dataset_name %in% c("Points d'observation écologique")) |>
   #filter(!dataset_name %in% c("Relevés écologiques terrestres nordiques")) |>
   #filter(!dataset_name %in% c("Réseau de suivi de la biodiversité du Québec")) |>

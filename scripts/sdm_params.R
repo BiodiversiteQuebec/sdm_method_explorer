@@ -1,10 +1,14 @@
 #####################################################
 ### Data parameters #################################
+
 ### minimal coordinate precision
 th <- min(res(predictors))#2500 
 th_small <- th # for local scale model if any
 
 keep_na <- FALSE
+
+### datasets that are assumed precise enough for every situation even though they have NA precision
+atlas_datasets_keep <- c("Réseau de suivi de la biodiversité du Québec", "Points d'observation écologique") 
 
 ####################################################
 ### Background parameters ##########################

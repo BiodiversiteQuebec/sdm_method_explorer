@@ -13,6 +13,7 @@ obs_atlas <- obs_atlas |>
   filter(observation_value != "0") |>
   mutate(date = as.character(as.Date(paste(year_obs, month_obs, day_obs, sep="-"), format = "%Y-%m-%d"))) |>
   mutate(source = "atlas") |>
+  mutate(coordinate_uncertainty = if_else(dataset_name %in% atlas_datasets_keep, "10", coordinate_uncertainty)) |>
   mutate(coordinate_uncertainty = as.numeric(coordinate_uncertainty)) |>
   as.data.frame() |>
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326) |>
@@ -43,6 +44,7 @@ background_atlas <- background_atlas |>
   st_transform(epsg) |>
   #mutate(species = valid_scientific_name) |>
   mutate(source = "atlas") |>
+  mutate(coordinate_uncertainty = if_else(dataset_name %in% atlas_datasets_keep, "10", coordinate_uncertainty)) |>
   mutate(coordinate_uncertainty = as.numeric(coordinate_uncertainty)) |>
   mutate(date = paste(year_obs, formatC(month_obs, width = 2, flag = 0), formatC(day_obs, width = 2, flag = 0), sep = "-"))
 

@@ -1,18 +1,21 @@
 #!/bin/bash
-#SBATCH --array=1-651%100
+#SBATCH --array=1-156%200
 #SBATCH --account=rpp-gonzalez
-#SBATCH --time=03:00:00
+#SBATCH --time=08:00:00
 #SBATCH --cpus-per-task=2
-#SBATCH --mem=300G
-#SBATCH --job-name=bq_vascular
+#SBATCH --mem=450G
+#SBATCH --job-name=bq_trees
 ##SBATCH --mail-user=francois.rousseu@usherbrooke.ca
 ##SBATCH --mail-type=ALL
+
+# 651
+# 156
 
 echo $SLURM_ARRAY_TASK_ID
 module load StdEnv/2023 gcc/12.3 r/4.5.0 geos/3.12.0 gdal/3.9.1 udunits/2.2.28 gsl/2.7 jags/4.3.2
 export JAVA_TOOL_OPTIONS="-Xmx250g" # for Maxent
 #export NODE_OPTIONS="--max-old-space-size=102400" # for concaveman V8 engine
-Rscript scripts/sdm_runs.R bq_vascular.R "$REPO" "$LABEL"
+Rscript scripts/sdm_runs.R bq_trees.R "$REPO" "$LABEL"
 
 # ls results/graphics | grep -E "Pseudacris_triseriata|Hemidactylium_scutatum|Gyrinophilus_porphyriticus|Desmognathus_ochrophaeus|Emydoidea_blandingii|Glyptemys_insculpta|Nerodia_sipedon|Lampropeltis_triangulum|Aquila_chrysaetos|Catharus_bicknelli|Setophaga_cerulea|Coturnicops_noveboracensis|Ixobrychus_exilis|Glaucomys_volans"
 

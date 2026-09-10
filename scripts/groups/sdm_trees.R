@@ -6,7 +6,6 @@ background_placettes <- atlas |>
   rename(species = valid_scientific_name) |>
   collect() |>
   (\(x) x[grepl("Placettes-échantillons|Points d'observation écologique|Relevés écologiques terrestres nordiques", x$dataset_name), ])() |>
-  mutate(coordinate_uncertainty = if_else(dataset_name %in% c("Points d'observation écologique"), "10", coordinate_uncertainty)) |> # assign high 
   #count(longitude, latitude) |> arrange(-n) |> nrow()
   #count(dataset_name)# |> _$n |> sum()#|>
   distinct(longitude, latitude, .keep_all = TRUE)
@@ -43,7 +42,6 @@ background_gbif <- gbif |>
 obs_atlas <- atlas |> 
   filter(genus == !!genus) |> 
   filter(!dataset_name %in% c("Pl@ntNet automatically identified occurrences")) |>
-  mutate(coordinate_uncertainty = if_else(dataset_name %in% c("Points d'observation écologique"), "10", coordinate_uncertainty)) |> # assign high 
   collect() |>
   mutate(species = sapply(strsplit(valid_scientific_name, " "), function(i){paste(i[1:2], collapse = " ")})) |>
   filter(species == !!sp)
