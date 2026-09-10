@@ -1,0 +1,309 @@
+
+
+# wget https://diffusion.mffp.gouv.qc.ca/Diffusion/DonneeGratuite/Foret/DONNEES_FOR_ECO_PROV/Aires_de_repartition_des_especes_PFFQ/02-Donnees/PROV/AIRES_REPARTITION_PFFQ.gpkg.zip
+
+# ogr2ogr -f GPKG aires_repartition_pffq.gpkg -nln aires_repartition_pffq -nlt CONVERT_TO_LINEAR -nlt PROMOTE_TO_MULTI AIRES_REPARTITION_PFFQ.gpkg aires_repartition_pffq
+
+#
+
+message(paste("Running: inputs","/",Sys.time(),"\n"))
+
+################################################################################
+### Paramaters #################################################################
+################################################################################
+
+data <- c("gbif", "ebird", "atlas")[1:3]
+
+group <- "arthropods"
+period <- c("breeding", "yearround", "nonbreeding", "prebreeding", "postbreeding")[2]
+target_group <- c("arthropods")
+
+#vars_pool<-c("conifers", "taiga", "deciduous", "mixed", "temperate_shrubland", "temperate_grassland", "polar_shrubland", "polar_grassland", "polar_barren", "wetland", "cropland", "barren", "urban", "water", "snow", "distfsl", "tmean", "prec", "geomflat", "elevation", "distroads", "sand")
+#vars_pool <- vars_pool[c(1, 4, 17)]
+
+rerun <- TRUE
+
+years <- list( # year wanted or a vector of years, has to be a range for gbif data
+  1800:2025
+)
+
+### Modeling ##################################################################
+
+models_all <- c("ewlgcpSDM","randomForest","brt", "gbm", "maxent")
+algorithms_all <- c("ewlgcpSDM","randomForest","brt", "gbm","maxent")
+
+models <- models_all[c(2:3, 5)]
+bias<-c("Bias","noBias")[1]
+usepredictors<-c("Predictors","noPredictors")[1]
+spatial<-c("Spatial","noSpatial")[2]
+
+
+### Variables ###################################################################
+
+species_vars <- list(
+`Aquila chrysaetos` = c("elevation", "ruggedness"), 
+`Catharus bicknelli` = c("elevation", "ruggedness"), 
+`Setophaga cerulea` = c("forest", "ph", "silt", "nitrogen"), 
+`Coturnicops noveboracensis` = c("flat", "marais", "wetland", "prairie_humide"), 
+`Ixobrychus exilis` = c("geomflat", "wetland", "marais", "eau_peu_profonde")#, 
+#`Glaucomys volans` = c("forest")
+)
+
+set.seed(1234)
+aires <- st_read("data/aires_repartition_pffq.gpkg") |>
+  mutate(species = sub("^(([^ ]+ )[^ ]+).*", "\\1", NOM_SCI)) |>
+  mutate(species = case_match(species, 
+    "Lonicera villosa" ~ "Lonicera caerulea", 
+    "Athyrium filix-femina" ~ "Athyrium angustum",
+    "Osmunda regalis" ~ "Osmunda spectabilis",
+    "Matteuccia struthiopteris" ~ "Matteuccia pensylvanica",
+    .default = species))
+#species <- unique(aires$species)
+
+#aires <- st_read("data/aires_repartition_pffq.gpkg") 
+#r <- rast(ext = ext(aires), resolution = 10000)
+#r <- rasterize(aires, r, fun = "count", background = 0)
+
+
+#vascan <- read.csv("data/vascan.txt", sep = "\t")
+#vascan <- vascan[vascan$Rank == "Species" & vascan$Quebec %in% c("Native", "Introduced", "Ephemeral"), ]
+#vascan <- vascan[!grepl("Tree", vascan$Habit), ]
+# species <- vascan$Scientific.name
+
+
+species <- c("Alopecosa hirtipes", "Arctosa alpigena","Cryphoeca montana","Cybaeopsis euopla","Cybaeopsis tibialis","Diplocentria bidentata","Diplocentria rectangulata","Hilaira herniosa","Improphantes complicatus","Microneta viaria","Ozyptila sincera canadensis","Pardosa uintana","Rugathodes sexpunctatus","Sciastes truncatus","Tapinocyba minuta","Wadotes calcaratus","Walckenaeria exigua","Xysticus elegans","Agonum palustre","Amara hyperborea","Calathus advena","Calathus ingratus","Pterostichus adstrictus","Pterostichus coracinus","Stereocerus haematopus","Uroblaniulus canadensis","Pseudopolydesmus serratus","Trichopetalum lunatum","Crosbycus dasycnemus","Leiobunum calcar","Mitopus morio","Coenagrion interrogatum","Cordulia shurtleffii","Enallagma annexum","Leucorrhinia glacialis","Nehalennia irene","Neotibicen canicularis","Scudderia pistillata") |> sub("^(([^ ]+ )[^ ]+).*", "\\1", x = _) # removes subspecies
+
+
+
+
+
+
+#species <- sample(species_info$species[species_info$group %in% "birds"], 300)
+#species <- sample(species_info$species[species_info$group %in% "trees"], 2)
+#species <- c("Aralia hispida", "Solidago rugosa")
+#species <- c("Trillium erectum", "Vitis riparia", "Allium tricoccum", "Medeola virginiana", "Uvularia sessilifolia", "Oclemena acuminata", "Polystichum braunii", "Veratrum viride", "Solidago macrophylla", "Ageratina altissima", "Viola labradorica") #
+#species <- c("Viola labradorica")
+set.seed(1234)
+#species <- sample(species,10)
+#species <- c("Trillium erectum", "Aralia nudicaulis")
+#species <- sample(species, 40)
+#species <- NULL # leave NULL if all species should be used
+#print(species)
+
+############################################################################################
+############################################################################################
+
+#atlas |> 
+#  filter(kingdom == "Plantae") |> 
+#  rename(species = valid_scientific_name) |> 
+#  count(dataset_name) |>
+#  arrange(-n) |>
+#  collect() |>
+#  as.data.frame() |>
+#  head(10)
+
+#atlas |> 
+#  filter(kingdom == "Plantae") |> 
+#  filter(dataset_name == "Points d'observation écologique") |> 
+#  rename(species = valid_scientific_name) |> 
+#  filter(species == "Oclemena acuminata") |>
+#  count(dataset_name, year_obs) |>
+#  arrange(dataset_name, -n) |>
+#  collect() |>
+#  as.data.frame()
+ 
+#atlas |> 
+#  filter(kingdom == "Plantae") |> 
+#  rename(species = valid_scientific_name) |> 
+#  count(dataset_name) |>
+#  arrange(-n) |>
+#  collect() |>
+#  #(\(x) x[grepl("Placettes-échantillons", x$dataset_name), ])() |>
+#  #group_by(species) |>
+#  #summarise(n = sum(n), .groups = "drop") |>
+#  #arrange(-n) |>
+#  as.data.frame() |>
+#  head(100)
+
+
+atlas <- duckdbfs::open_dataset("data/atlas_2025-09-11.parquet", tblname = "atlas")
+gbif <- duckdbfs::open_dataset("data/gbif_2025-03-01.parquet")
+ebird <- duckdbfs::open_dataset("data/ebd_relJan-2025.parquet")
+
+
+species_info <- atlas |>
+  filter(phylum %in% c("Arthropoda")) |>
+  mutate(taxon = tolower(group_en)) |>
+  mutate(start = "01-01") |>
+  mutate(end = "12-31") |>
+  mutate(group = group) |>
+  rename(species = valid_scientific_name) |>
+  count(group, taxon, order, family, species, dataset_name) |>
+  collect() |>
+  mutate(species = sub("^(([^ ]+ )[^ ]+).*", "\\1", species)) |>
+  group_by(group, taxon, order, family, species, dataset_name) |>
+  mutate(reseau = dataset_name == "Réseau de suivi de la biodiversité du Québec") |>
+  arrange(group, taxon, order, family, species, -n) |>
+  group_by(group, taxon, order, family, species) |>
+  summarise(
+    n_non_reseau = sum(n[!reseau]),
+    n_reseau     = sum(n[reseau]),
+    n            = sum(n),
+    .groups = "drop"
+  ) |>
+  #arrange(order, family, -n) |>
+  as.data.frame()
+
+species_info <- species_info[species_info$species %in% species, ]
+
+species_info <- species_info[species_info$n >= 5, ]
+species_info <- species_info[rev(order(species_info$n)), ]
+
+
+#atlas |>
+#  filter(valid_scientific_name %in% c("Dryobates villosus", "Leuconotopicus villosus")) |>
+#  count(valid_scientific_name) |>
+#  collect()
+
+#atlas |>
+#  filter(grepl("Dryobates|Leuconotopicus", valid_scientific_name)) |>
+#  count(valid_scientific_name) |>
+#  collect()
+
+ma <- match(species_info$species, names(species_vars))
+species_info$vars <- species_vars[ma]
+
+## common vars
+species_info$vars <- lapply(species_info$vars, function(i){
+  add <- vars_pool
+  if(!is.null(i)){
+    unique(c(i, add))
+  } else {
+    add
+  }
+})
+
+breeding_periods <- lapply(1:nrow(species_info), function(i){
+  c(species_info$start[i], species_info$end[i])
+})
+names(breeding_periods) <- species_info$species
+
+species_target_groups <- as.list(species_info$group)
+names(species_target_groups) <- species_info$species
+
+species_vars<- species_info$vars
+names(species_vars) <- species_info$species
+
+
+###################################
+###################################
+###################################
+
+yearparams <- sapply(years, function(y){
+  ifelse(length(y) > 1, paste(min(y), max(y), sep = "-"), y) 
+})
+
+if((group == "birds" | any(data %in% "ebird")) & period != "yearround"){
+  eb <- get_ebirdst()
+  ma <- match(species, eb$scientific_name)
+  if(any(is.na(ma))){
+    warning(paste(paste(species[is.na(ma)], collapse = " "), "have no matches in ebirdst"))
+  }
+  periodparams <- eb[[period]][ma]
+  periodparams <- ifelse(is.na(periodparams), "0101-1231", periodparams)
+} else {
+  periodparams <- "0101-1231"
+}
+
+
+results <- expand.grid(job = job,
+                       group = group,
+                       species = species, 
+                       target_group = target_group, 
+                       years = yearparams, 
+                       model = models, 
+                       bias = bias,
+                       usepredictors = usepredictors, 
+                       spatial = spatial, 
+                       stringsAsFactors = FALSE)
+
+results$period <- period
+results$dates <- periodparams#[match(results$species, species)]
+results$algorithm <- algorithms_all[match(results$model, models_all)]
+o <- c("job", "group", "species", "years", "period", "dates", "target_group", "model", "algorithm", "bias", "usepredictors", "spatial")
+results <- results[ , o]
+
+#for file in *.tif; do
+#  new=$(echo "$file" | sed -E 's/^(([^_]*_){4})/\1yearround_0101-1231_/')
+#  mv "$file" "$new"
+#done
+
+results <- results[apply(results[,c("usepredictors","spatial")],1,function(i){!all(c("noPredictors","noSpatial")==i)}),] # remove nopredictors and nospatial
+
+### randomize cases
+if(FALSE){
+  set.seed(1234)
+  results <- results[sample(1:nrow(results)), ]
+}
+
+if(!rerun){
+  #x <- fromJSON("results.json") |> setDT()
+  #results <- fsetdiff(setDT(results), x[, names(results), with = FALSE], all = FALSE) |> as.data.frame()
+
+  x <- list.files("outputs", pattern = ".tif") |>
+          gsub(".tif", "", x = _) |>
+    strsplit("_") |>
+    lapply(function(i){
+      c(i[1], sub("^(\\w)", "\\U\\1", paste(i[2:3], collapse = " "), perl = TRUE), i[4:length(i)])
+    }) |>
+    do.call("rbind", args = _) |>
+    as.data.table() |>
+    setnames(c("group", "species", "years", "period", "dates", "model", "algorithm", "usepredictors", "bias", "spatial"))
+    
+  results <- fsetdiff(setDT(results[, names(x)]), x, all = FALSE) |> as.data.frame()
+
+}
+
+set.seed(1234)
+results <- merge(results, species_info)
+#species <- unique(c("Elymus hystrix", "Trillium erectum", "Clintonia borealis", "Cypripedium acaule", "Cornus canadensis", "Tussilago farfara", "Veratrum viride", "Erythronium americanum", "Rhododendron groenlandicum", sample(unique(results$species), 50)))
+species <- intersect(results$species, aires$species)#[1] # 651
+#results <- results[results$species %in% sample(unique(results$species), 10), ]
+#results <- results[results$species %in% species, ] # 651
+as.data.table(results) # just to print head and tail
+
+#library(jsonlite)
+#new <- toJSON(results)
+#write_json(results, "x")
+
+#dplyr::bind_rows(results, old)
+#xx <- rbindlist(list(results, old), fill = TRUE)
+#write_json(results, "results.json")
+
+#if(file.exists("results.json")){
+#  old <- fromJSON("results.json")
+#  res <- rbindlist(list(results, old), fill = TRUE)
+#}
+
+
+if(FALSE){
+
+citizen <- c("iNaturalist Research-grade Observations", "Atlas des Oiseaux Nicheurs du Québec", "Pl@ntNet automatically identified occurrences", "Pl@ntNet observations", "Monarch Watch", "Xeno-canto - Bird sounds from around the world", "Observation.org, Nature data from around the World", "Breeding birds survey North America", "Great Backyard Bird Count", "eButterfly Surveys")
+
+#citizen <- c("iNaturalist Research-grade Observations")
+
+ebird <- c("EOD – eBird Observation Dataset", citizen)
+
+x <- duckdbfs::open_dataset("data/atlas_2026-05-04.parquet", tblname = "atlas") |>
+  count(dataset_name) |>
+  mutate(cit= dataset_name %in% citizen) |>
+  mutate(eb = dataset_name %in% ebird) |>
+  mutate(pour_citizen = sum(n[cit]) / sum(n[!eb])) |>
+  mutate(pour_ebird = sum(n[eb]) / sum(n)) |>
+  arrange(-n) |>
+  collect() |>
+  as.data.table()
+
+x
+
+}
