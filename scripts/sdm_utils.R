@@ -24,7 +24,7 @@ write_preds <- function(preds){
   res <- mask(res, vect(lakes), inverse = TRUE)
   metags(res) <- paste(names(params), params, sep = "=")
   names(res) <- "prediction"
-  writeRaster(res, filepath, overwrite = TRUE, filetype = "COG")    
+  writeRaster(res, filepath, overwrite = TRUE, filetype = "COG", statistics = 3, gdal = c("OVERVIEW_COUNT=5", "OVERVIEW_RESAMPLING=AVERAGE"))    
 }
 
 plot_vb<-function(occs=TRUE){
